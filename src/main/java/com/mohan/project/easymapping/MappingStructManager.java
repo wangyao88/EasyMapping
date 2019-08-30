@@ -12,6 +12,7 @@ import com.mohan.project.easymapping.generator.Generators;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.file.FileTools;
+import com.mohan.project.easytools.log.LogTools;
 import org.apache.commons.lang3.ArrayUtils;
 import org.reflections.Reflections;
 
@@ -26,9 +27,10 @@ import java.util.stream.Collectors;
  */
 public class MappingStructManager {
 
+    public static final String PROJECT_NAME= "MappingStruct";
     private static final Multimap<String, MappingParameter> MAPPING_MAP = ArrayListMultimap.create();
 
-    static void init(String[] basePackages) throws ScanException {
+    static void init(String[] basePackages, boolean enableLog) throws ScanException {
         Set<Class<?>> mappingStructTypes = Sets.newHashSet();
         try{
             Reflections reflections = new Reflections(basePackages);
@@ -51,7 +53,9 @@ public class MappingStructManager {
                 }
             }
         }
-        showMappings(MAPPING_MAP);
+        if(enableLog) {
+            showMappings();
+        }
     }
 
     private static Optional<MappingParameter> configureMappingParameter(Field targetField, Mapping mapping, List<Field> sourceFields) {
@@ -100,8 +104,17 @@ public class MappingStructManager {
         }
     }
 
-    private static void showMappings(Multimap<String, MappingParameter> mappingMap) {
-        System.out.println(mappingMap);
+    private static void showMappings() {
+        String banner = FileTools.getBanner();
+        System.out.println(banner);
+        LogTools.info("{0}成功启动！扫描解析结果如下：", MappingStructManager.PROJECT_NAME);
+        MAPPING_MAP.asMap().forEach((key, mappingParameters) -> {
+            System.out.println(key);
+            for (MappingParameter mappingParameter : mappingParameters) {
+                System.out.println(mappingParameter.getMappingParameterInfo());
+            }
+            LogTools.printDividingLine(85);
+        });
     }
 
     public static void mapping(Object target, Object source) {

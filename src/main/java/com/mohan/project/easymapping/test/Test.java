@@ -2,14 +2,19 @@ package com.mohan.project.easymapping.test;
 
 import com.mohan.project.easymapping.MappingStructManager;
 import com.mohan.project.easymapping.MappingStructStarter;
-import com.mohan.project.easymapping.NoBasePackageException;
 import com.mohan.project.easymapping.ScanException;
+import com.mohan.project.easytools.log.LogTools;
 
 import java.util.Optional;
 
+/**
+ * 实体属性映射器测试类
+ * @author mohan
+ * @date 2019-08-30 09:24:26
+ */
 public class Test {
 
-    public static void main(String[] args) throws ScanException, NoBasePackageException {
+    public static void main(String[] args) throws ScanException {
         Person person = new Person();
         person.setId("person-id");
         person.setPersonName("person-name");
@@ -19,7 +24,7 @@ public class Test {
         address.setRoad("road");
         person.setAddress(address);
 
-        MappingStructStarter.MappingStructStarterBuilder.newBuilder().basePackages("com.mohan.project.easymapping").build().start();
+        MappingStructStarter.MappingStructStarterBuilder.newBuilder().enableLog().build().start();
 
         Optional<Student> optional = MappingStructManager.mapping(Student.class, person);
         optional.ifPresent(student -> {
@@ -31,7 +36,7 @@ public class Test {
             System.out.println(student.getRoadName());
         });
 
-        System.out.println("---------------------------");
+        LogTools.printDividingLine(85);
         Student student = new Student();
         student.setId("student");
         MappingStructManager.mapping(student, person);

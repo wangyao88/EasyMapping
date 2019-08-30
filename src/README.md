@@ -2,9 +2,10 @@ EasyMapping
     实体属性映射器。本版本为静态扫描加反射实现静态映射
 
 如何使用
+enableLog 是否开启日志
 MappingStructStarterBuilder.newBuilder().basePackages(basePackage1, basePackage2, ...).build().start();
 
-public static void main(String[] args) throws ScanException, NoBasePackageException {
+public static void main(String[] args) throws ScanException {
     Person person = new Person();
     person.setId("person-id");
     person.setPersonName("person-name");
@@ -14,7 +15,7 @@ public static void main(String[] args) throws ScanException, NoBasePackageExcept
     address.setRoad("road");
     person.setAddress(address);
 
-    MappingStructStarter.MappingStructStarterBuilder.newBuilder().basePackages("com.mohan.project.easymapping").build().start();
+    MappingStructStarter.MappingStructStarterBuilder.newBuilder().enableLog().build().start();
 
     Optional<Student> optional = MappingStructManager.mapping(Student.class, person);
     optional.ifPresent(student -> {
