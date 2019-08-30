@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 实体属性映射属性
- * @author wangyao
+ * @author mohan
  * @date 2019-08-23 13:36:23
  */
 @Data

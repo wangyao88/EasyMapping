@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.mohan.project.easymapping.convert.ConvertType;
 import com.mohan.project.easymapping.convert.Converts;
 import com.mohan.project.easymapping.generator.GeneratorType;
@@ -11,7 +12,6 @@ import com.mohan.project.easymapping.generator.Generators;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.file.FileTools;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.reflections.Reflections;
 
@@ -21,17 +21,21 @@ import java.util.stream.Collectors;
 
 /**
  * 实体属性映射管理类
- * @author wangyao
+ * @author mohan
  * @date 2019-08-23 13:36:23
  */
-@Slf4j
 public class MappingStructManager {
 
     private static final Multimap<String, MappingParameter> MAPPING_MAP = ArrayListMultimap.create();
 
-    private void init() {
-        Reflections reflections = new Reflections("cn.com.cis.entity", "cn.com.cis.controller.entity");
-        Set<Class<?>> mappingStructTypes = reflections.getTypesAnnotatedWith(MappingStruct.class);
+    static void init(String[] basePackages) throws ScanException {
+        Set<Class<?>> mappingStructTypes = Sets.newHashSet();
+        try{
+            Reflections reflections = new Reflections(basePackages);
+            mappingStructTypes.addAll(reflections.getTypesAnnotatedWith(MappingStruct.class));
+        }catch (Exception e) {
+            throw new ScanException();
+        }
         for (Class<?> mappingStructType : mappingStructTypes) {
             String name = mappingStructType.getName();
             MappingStruct mappingStruct = mappingStructType.getAnnotation(MappingStruct.class);
@@ -50,7 +54,7 @@ public class MappingStructManager {
         showMappings(MAPPING_MAP);
     }
 
-    private Optional<MappingParameter> configureMappingParameter(Field targetField, Mapping mapping, List<Field> sourceFields) {
+    private static Optional<MappingParameter> configureMappingParameter(Field targetField, Mapping mapping, List<Field> sourceFields) {
         String targetFieldName = targetField.getName();
         GeneratorType generatorType = mapping.generator();
         if(!generatorType.equals(GeneratorType.NONE)) {
@@ -68,7 +72,7 @@ public class MappingStructManager {
         throw new RuntimeException("原实体类不存在指定属性：" + sourceFieldName);
     }
 
-    private Optional<List<Field>> getSourceField(String sourceFieldName, List<Field> sourceFields) {
+    private static Optional<List<Field>> getSourceField(String sourceFieldName, List<Field> sourceFields) {
         if(sourceFieldName.contains(StringTools.POINT)) {
             Iterator<String> sourceFieldNameIterator = StringTools.splitWithSeparator(StringTools.POINT, sourceFieldName).iterator();
             List<Field> result = Lists.newArrayList();
@@ -79,7 +83,7 @@ public class MappingStructManager {
         return Optional.ofNullable(results);
     }
 
-    private void recursiveGetSourceField(Iterator<String> sourceFieldNameIterator, List<Field> sourceFields, List<Field> results) {
+    private static void recursiveGetSourceField(Iterator<String> sourceFieldNameIterator, List<Field> sourceFields, List<Field> results) {
         if(sourceFieldNameIterator.hasNext()) {
             String sourceFieldName = sourceFieldNameIterator.next();
             Optional<Field> result = sourceFields.stream().filter(sourceField -> sourceField.getName().equals(sourceFieldName)).findFirst();
@@ -96,7 +100,7 @@ public class MappingStructManager {
         }
     }
 
-    private void showMappings(Multimap<String, MappingParameter> mappingMap) {
+    private static void showMappings(Multimap<String, MappingParameter> mappingMap) {
         System.out.println(mappingMap);
     }
 
