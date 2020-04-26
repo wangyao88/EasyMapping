@@ -19,6 +19,7 @@ import org.reflections.Reflections;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 实体属性映射管理类
@@ -44,18 +45,42 @@ public class MappingStructManager {
             Class<?> source = mappingStruct.source();
             List<Field> sourceFields = Lists.newArrayList(source.getDeclaredFields());
             Field[] declaredFields = mappingStructType.getDeclaredFields();
-            for (Field declaredField : declaredFields) {
-                Mapping[] mappings = declaredField.getAnnotationsByType(Mapping.class);
-                if(ArrayUtils.isNotEmpty(mappings)) {
-                    Mapping mapping = mappings[0];
-                    Optional<MappingParameter> mappingFieldOptional = configureMappingParameter(declaredField, mapping, sourceFields);
-                    mappingFieldOptional.ifPresent(mappingParameter -> MAPPING_MAP.put(name, mappingParameter));
-                }
+            List<Field> needMappingFields = Stream.of(declaredFields).filter(declaredField -> ArrayUtils.isNotEmpty(declaredField.getAnnotationsByType(Mapping.class))).collect(Collectors.toList());
+            if(needMappingFields.isEmpty()) {
+                mappingAllField(name, Stream.of(declaredFields).collect(Collectors.toList()), sourceFields);
+            }else {
+                mappingSignedField(name, needMappingFields, sourceFields);
             }
         }
         if(enableLog) {
             showMappings();
         }
+    }
+
+    private static void mappingAllField(String name, List<Field> needMappingFields, List<Field> sourceFields) {
+        for (Field needMappingField : needMappingFields) {
+            Optional<MappingParameter> mappingFieldOptional = configureMappingParameter(needMappingField, sourceFields);
+            mappingFieldOptional.ifPresent(mappingParameter -> MAPPING_MAP.put(name, mappingParameter));
+        }
+    }
+
+    private static void mappingSignedField(String name, List<Field> needMappingFields, List<Field> sourceFields) {
+        for (Field declaredField : needMappingFields) {
+            Mapping[] mappings = declaredField.getAnnotationsByType(Mapping.class);
+            Optional<MappingParameter> mappingFieldOptional = configureMappingParameter(declaredField, mappings[0], sourceFields);
+            mappingFieldOptional.ifPresent(mappingParameter -> MAPPING_MAP.put(name, mappingParameter));
+        }
+    }
+
+    private static Optional<MappingParameter> configureMappingParameter(Field targetField, List<Field> sourceFields) {
+        String targetFieldName = targetField.getName();
+        String sourceFieldName = targetFieldName;
+        Optional<List<Field>> sourceFieldOptional = getSourceField(sourceFieldName, sourceFields);
+        if(sourceFieldOptional.isPresent()) {
+            MappingParameter mappingParameter = MappingParameter.builder().target(targetField).sources(sourceFieldOptional.get()).convertType(ConvertType.NONE).generatorType(GeneratorType.NONE).build();
+            return Optional.of(mappingParameter);
+        }
+        throw new RuntimeException("原实体类不存在指定属性：" + sourceFieldName);
     }
 
     private static Optional<MappingParameter> configureMappingParameter(Field targetField, Mapping mapping, List<Field> sourceFields) {
@@ -84,7 +109,7 @@ public class MappingStructManager {
             return Optional.of(result);
         }
         List<Field> results = sourceFields.stream().filter(sourceField -> sourceField.getName().equals(sourceFieldName)).collect(Collectors.toList());
-        return Optional.ofNullable(results);
+        return Optional.of(results);
     }
 
     private static void recursiveGetSourceField(Iterator<String> sourceFieldNameIterator, List<Field> sourceFields, List<Field> results) {
