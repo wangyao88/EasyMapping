@@ -9,11 +9,11 @@ import com.mohan.project.easymapping.convert.ConvertType;
 import com.mohan.project.easymapping.convert.Converts;
 import com.mohan.project.easymapping.generator.GeneratorType;
 import com.mohan.project.easymapping.generator.Generators;
+import com.mohan.project.easytools.common.ArrayTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.file.FileTools;
 import com.mohan.project.easytools.log.LogTools;
-import org.apache.commons.lang3.ArrayUtils;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
@@ -45,7 +45,7 @@ public class MappingStructManager {
             Class<?> source = mappingStruct.source();
             List<Field> sourceFields = Lists.newArrayList(source.getDeclaredFields());
             Field[] declaredFields = mappingStructType.getDeclaredFields();
-            List<Field> needMappingFields = Stream.of(declaredFields).filter(declaredField -> ArrayUtils.isNotEmpty(declaredField.getAnnotationsByType(Mapping.class))).collect(Collectors.toList());
+            List<Field> needMappingFields = Stream.of(declaredFields).filter(declaredField -> ArrayTools.isNotEmpty(declaredField.getAnnotationsByType(Mapping.class))).collect(Collectors.toList());
             if(needMappingFields.isEmpty()) {
                 mappingAllField(name, Stream.of(declaredFields).collect(Collectors.toList()), sourceFields);
             }else {
@@ -130,8 +130,8 @@ public class MappingStructManager {
     }
 
     private static void showMappings() {
-        String banner = FileTools.getBanner();
-        System.out.println(banner);
+//        String banner = FileTools.getBanner();
+//        System.out.println(banner);
         LogTools.info("{0}成功启动！扫描解析结果如下：", MappingStructManager.PROJECT_NAME);
         MAPPING_MAP.asMap().forEach((key, mappingParameters) -> {
             System.out.println(key);

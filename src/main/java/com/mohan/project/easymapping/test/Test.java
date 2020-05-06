@@ -26,25 +26,20 @@ public class Test {
 
         MappingStructStarter.MappingStructStarterBuilder.newBuilder().enableLog().build().start();
 
-        Optional<Student> optional = MappingStructManager.mapping(Student.class, person);
-        optional.ifPresent(student -> {
-            System.out.println(student.getId());
-            System.out.println(student.getName());
-            System.out.println(student.getAge());
-            System.out.println(student.getHeight());
-            System.out.println(student.getDate());
-            System.out.println(student.getRoadName());
-        });
+//        Optional<Student> optional = MappingStructManager.mapping(Student.class, person);
+//        optional.ifPresent(student -> {
+//            System.out.println(student.getId());
+//            System.out.println(student.getName());
+//            System.out.println(student.getAge());
+//            System.out.println(student.getHeight());
+//            System.out.println(student.getDate());
+//            System.out.println(student.getRoadName());
+//        });
 
         LogTools.printDividingLine(85);
         Student student = new Student();
         student.setId("student");
         MappingStructManager.mapping(student, person);
-        System.out.println(student.getId());
-        System.out.println(student.getName());
-        System.out.println(student.getAge());
-        System.out.println(student.getHeight());
-        System.out.println(student.getDate());
-        System.out.println(student.getRoadName());
+        System.out.println(student);
     }
 }
