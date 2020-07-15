@@ -1,25 +1,26 @@
 package com.mohan.project.easymapping.convert;
 
-import java.util.HashMap;
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 import java.util.function.Function;
 
 /**
  * 实体属性值转换器
- * @author mohan
- * @date 2019-08-23 13:36:23
+ * @author WangYao
+ * @since 2019-08-23 13:36:23
  */
 public class Converts {
 
-    private static final Map<ConvertType, Function> CONVERTS = new HashMap<>();
+    private static final Map<ConvertType, Function<Object, Object>> CONVERT_TYPE_FUNCTION_MAP = Maps.newEnumMap(ConvertType.class);
 
     static {
-        CONVERTS.put(ConvertType.NONE, (obj) -> null);
-        CONVERTS.put(ConvertType.String, String::valueOf);
+        CONVERT_TYPE_FUNCTION_MAP.put(ConvertType.NONE, (obj) -> null);
+        CONVERT_TYPE_FUNCTION_MAP.put(ConvertType.String, String::valueOf);
     }
 
     public static Object convert(ConvertType convertType, Object sourceValue) {
-        Function function = CONVERTS.getOrDefault(convertType, (obj) -> null);
+        Function<Object, Object> function = CONVERT_TYPE_FUNCTION_MAP.getOrDefault(convertType, (obj) -> null);
         return function.apply(sourceValue);
     }
 }

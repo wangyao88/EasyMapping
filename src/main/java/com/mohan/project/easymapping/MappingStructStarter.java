@@ -1,54 +1,55 @@
 package com.mohan.project.easymapping;
 
-
-import com.mohan.project.easytools.common.ArrayTools;
-import com.mohan.project.easytools.common.StringTools;
+import com.mohan.project.easymapping.exception.OnceStartException;
+import com.mohan.project.easymapping.parser.BaseParser;
+import com.mohan.project.easytools.log.LogTools;
 
 /**
- * 实体属性映射启动类
- * @author mohan
- * @date 2019-08-30 09:24:26
+ * 实体属性映射启动器
+ *
+ * @author WangYao
+ * @since 2019-08-23 13:36:23
  */
-public class MappingStructStarter {
+public final class MappingStructStarter {
 
-    private static final String DEFAULT_BASE_PACKAGE = StringTools.EMPTY;
+    private volatile static boolean parsed = false;
+    private static Throwable throwable;
 
-    private MappingStructStarter() {}
+    public static final Object LOCK = new Object();
 
-    private String[] basePackages;
-    private boolean enableLog;
+    private MappingStructStarter() {
 
-    public void start() throws ScanException {
-        if(ArrayTools.isEmpty(basePackages)) {
-            basePackages = new String[]{DEFAULT_BASE_PACKAGE};
-        }
-        MappingStructManager.init(basePackages, enableLog);
     }
 
-    public static class MappingStructStarterBuilder {
-
-        private String[] basePackages;
-        private boolean enableLog;
-
-        public static MappingStructStarterBuilder newBuilder() {
-            return new MappingStructStarterBuilder();
+    public static void start(String scanPath) {
+        try {
+            synchronized (LOCK) {
+                if(parsed) {
+                    throw new OnceStartException();
+                }
+                BaseParser.getInstance().doParse(scanPath);
+                parsed = true;
+            }
+        } catch (Exception e) {
+            LogTools.error("解析MappingStruct注解失败!", e);
+            throwable = e;
         }
+        showMappingInfo();
+    }
 
-        public MappingStructStarterBuilder basePackages(String... basePackages) {
-            this.basePackages = basePackages;
-            return this;
-        }
+    public static void showMappingInfo() {
+        BaseParser.getInstance().showMappingInfo();
+    }
 
-        public MappingStructStarterBuilder enableLog() {
-            this.enableLog = true;
-            return this;
+    static boolean valid(boolean useSmartMode) {
+        if (throwable != null) {
+            LogTools.error("解析MappingStruct注解失败！无法映射！", throwable);
+            return false;
         }
-
-        public MappingStructStarter build() {
-            MappingStructStarter mappingStructStarter = new MappingStructStarter();
-            mappingStructStarter.basePackages = this.basePackages;
-            mappingStructStarter.enableLog = this.enableLog;
-            return mappingStructStarter;
+        if (!parsed && !useSmartMode) {
+            LogTools.error("尚未解析MappingStruct注解！无法映射！请先调用MappingStructStarter.start(String scanPath)方法");
+            return false;
         }
+        return true;
     }
 }

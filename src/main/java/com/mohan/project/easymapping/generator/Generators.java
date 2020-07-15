@@ -1,30 +1,33 @@
 package com.mohan.project.easymapping.generator;
 
-
+import com.google.common.collect.Maps;
 import com.mohan.project.easytools.common.UUIDTools;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 /**
  * 实体属性默认值生成策略
- * @author mohan
- * @date 2019-08-23 13:36:23
+ * @author WangYao
+ * @since 2019-08-23 13:36:23
  */
 public class Generators {
 
-    private static final Map<GeneratorType, Supplier> GENERATORS = new HashMap<>();
+    private static final Map<GeneratorType, Supplier<Object>> GENERATOR_TYPE_SUPPLIER_MAP = Maps.newEnumMap(GeneratorType.class);
 
     static {
-        GENERATORS.put(GeneratorType.NONE, () -> null);
-        GENERATORS.put(GeneratorType.UUID, UUIDTools::getUUID);
-        GENERATORS.put(GeneratorType.NOW, Date::new);
+        GENERATOR_TYPE_SUPPLIER_MAP.put(GeneratorType.NONE, () -> null);
+        GENERATOR_TYPE_SUPPLIER_MAP.put(GeneratorType.UUID, UUIDTools::getUUID32);
+        GENERATOR_TYPE_SUPPLIER_MAP.put(GeneratorType.NOW_DATE, Date::new);
+        GENERATOR_TYPE_SUPPLIER_MAP.put(GeneratorType.NOW_LOCAL_DATE, LocalDate::now);
+        GENERATOR_TYPE_SUPPLIER_MAP.put(GeneratorType.NOW_LOCAL_DATE_TIME, LocalDateTime::now);
     }
 
-    public static Object generate(GeneratorType generatorType) {
-        Supplier supplier = GENERATORS.getOrDefault(generatorType, () -> null);
+    public static Object generator(GeneratorType generatorType) {
+        Supplier<Object> supplier = GENERATOR_TYPE_SUPPLIER_MAP.getOrDefault(generatorType, () -> null);
         return supplier.get();
     }
 }
