@@ -1,8 +1,8 @@
-package com.mohan.project.easymapping.mapping;
+package com.mohan.project.easymapping.mapping.reflect;
 
 
 import com.mohan.project.easymapping.MappingParameter;
-import com.mohan.project.easymapping.MappingStructConstant;
+import com.mohan.project.easymapping.EasyMappingConstant;
 import com.mohan.project.easymapping.convert.ConvertType;
 import com.mohan.project.easymapping.convert.Converts;
 import com.mohan.project.easymapping.exception.ConfigureTargetFieldFromSourceValueException;
@@ -25,19 +25,19 @@ import java.util.Optional;
  * @author WangYao
  * @since 2019-08-23 13:36:23
  */
-public final class NormalMapping {
+public final class NormalReflectMapping {
 
     private final Object lock = new Object();
 
-    private NormalMapping() {
+    private NormalReflectMapping() {
     }
 
     private static class Single {
-        private static final NormalMapping NORMAL_MAPPING = new NormalMapping();
+        private static final NormalReflectMapping NORMAL_REFLECT_MAPPING = new NormalReflectMapping();
     }
 
-    public static NormalMapping getInstance() {
-        return Single.NORMAL_MAPPING;
+    public static NormalReflectMapping getInstance() {
+        return Single.NORMAL_REFLECT_MAPPING;
     }
 
     public <T> Optional<T> mapping(Object target, List<Object> sources, Collection<MappingParameter> mappingParameters) {
@@ -71,7 +71,7 @@ public final class NormalMapping {
         Object sourceValue = null;
         ConvertType convertType = mappingParameter.getConvertType();
         int index = mappingParameter.getIndex();
-        if (index != MappingStructConstant.DEFAULT_FIELD_INDEX) {
+        if (index != EasyMappingConstant.DEFAULT_FIELD_INDEX) {
             if (index > sources.size() - 1 && !mappingParameter.isIgnoreException()) {
                 String msg = configureMappingIndexOutOfBoundsException(sources.size(), mappingParameter);
                 throw new MappingIndexOutOfBoundsException(msg);

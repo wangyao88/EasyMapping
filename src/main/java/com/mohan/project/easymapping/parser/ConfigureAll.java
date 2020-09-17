@@ -3,7 +3,7 @@ package com.mohan.project.easymapping.parser;
 import com.google.common.collect.Lists;
 import com.mohan.project.easymapping.CustomerGenerator;
 import com.mohan.project.easymapping.MappingParameter;
-import com.mohan.project.easymapping.MappingStructConstant;
+import com.mohan.project.easymapping.EasyMappingConstant;
 import com.mohan.project.easymapping.convert.ConvertType;
 import com.mohan.project.easymapping.exception.AttributeNotExistException;
 import com.mohan.project.easymapping.exception.InitializeCustomerGeneratorException;
@@ -45,7 +45,7 @@ public class ConfigureAll extends BaseConfiguration implements Configuration {
                         .generator(Generator.getDefault())
                         .ignoreMissing(parserParameter.isIgnoreMissing())
                         .ignoreException(parserParameter.isIgnoreException())
-                        .index(MappingStructConstant.DEFAULT_FIELD_INDEX)
+                        .index(EasyMappingConstant.DEFAULT_FIELD_INDEX)
                         .build();
         CustomerGenerator customerGenerator = needMappingField.getAnnotation(CustomerGenerator.class);
         if(ObjectTools.isNotNull(customerGenerator)) {

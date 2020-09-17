@@ -19,6 +19,7 @@ public class User {
 
     @Mapping
     private String id;
+
     @Mapping(source = "sName")
     private String uName;
 

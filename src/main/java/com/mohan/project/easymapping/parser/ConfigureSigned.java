@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.mohan.project.easymapping.CustomerGenerator;
 import com.mohan.project.easymapping.Mapping;
 import com.mohan.project.easymapping.MappingParameter;
-import com.mohan.project.easymapping.MappingStructConstant;
+import com.mohan.project.easymapping.EasyMappingConstant;
 import com.mohan.project.easymapping.convert.ConvertType;
 import com.mohan.project.easymapping.exception.AttributeNotExistException;
 import com.mohan.project.easymapping.exception.InitializeCustomerGeneratorException;
@@ -81,7 +81,7 @@ public class ConfigureSigned extends BaseConfiguration implements Configuration 
             return Optional.of(mappingParameter);
         }
         String source = mapping.source();
-        String sourceFieldName = MappingStructConstant.DEFAULT_FIELD_NAME.equals(source) ? targetFieldName : source;
+        String sourceFieldName = EasyMappingConstant.DEFAULT_FIELD_NAME.equals(source) ? targetFieldName : source;
         if(ConfigureSourceStatus.MISS_ATTRIBUTE == configureSourceStatus) {
             if (parserParameter.isIgnoreMissing()) {
                 return Optional.empty();
@@ -93,11 +93,11 @@ public class ConfigureSigned extends BaseConfiguration implements Configuration 
 
     private ConfigureSourceStatus configureSource(Mapping mapping, ParserParameter parserParameter, String targetFieldName, MappingParameter mappingParameter) {
         int index = mapping.index();
-        if(index != MappingStructConstant.DEFAULT_FIELD_INDEX && index != parserParameter.getSourceIndex()) {
+        if(index != EasyMappingConstant.DEFAULT_FIELD_INDEX && index != parserParameter.getSourceIndex()) {
             return ConfigureSourceStatus.MISS_INDEX;
         }
         String source = mapping.source();
-        String sourceFieldName = MappingStructConstant.DEFAULT_FIELD_NAME.equals(source) ? targetFieldName : source;
+        String sourceFieldName = EasyMappingConstant.DEFAULT_FIELD_NAME.equals(source) ? targetFieldName : source;
         Optional<List<Field>> sourceFieldOptional = getSourceField(sourceFieldName, parserParameter.getSourceFields());
         if(sourceFieldOptional.isPresent() && CollectionTools.isNotEmpty(sourceFieldOptional.get())) {
             mappingParameter.setSources(sourceFieldOptional.get());

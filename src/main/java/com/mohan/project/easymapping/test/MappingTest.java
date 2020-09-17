@@ -1,7 +1,7 @@
 package com.mohan.project.easymapping.test;
 
-import com.mohan.project.easymapping.MappingStructManager;
-import com.mohan.project.easymapping.MappingStructStarter;
+import com.mohan.project.easymapping.EasyMappingManager;
+import com.mohan.project.easymapping.EasyMappingStarter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,19 +16,37 @@ public class MappingTest {
 
     @Before
     public void init() {
-        MappingStructStarter.start("com.mohan.project.easymapping.test");
+        EasyMappingStarter.start("com.mohan.project.easymapping.test");
     }
 
     @Test
     public void simpleTest() {
-        Student student = new Student();
-        student.setId("1");
-        student.setSName("lucy");
-        student.setScore(98.5d);
-        student.setAddress("北京");
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000000; i++) {
+            Student student = new Student();
+            student.setId("1");
+            student.setSName("lucy");
+            student.setScore(98.5d);
+            student.setAddress("北京");
 
-        Optional<User> userOptional = MappingStructManager.normalMapping(User.class, student);
-        Assert.assertTrue(userOptional.isPresent());
-        System.out.println(userOptional.get());
+            EasyMappingManager.normalMapping(User.class, student);
+        }
+        System.out.println(System.currentTimeMillis() - start);
+    }
+
+    @Test
+    public void fastSmartMappingTest() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000000; i++) {
+            Student student = new Student();
+            student.setId("1");
+            student.setSName("lucy");
+            student.setScore(98.5d);
+            student.setAddress("北京");
+
+            EasyMappingManager.fastSmartMapping(User.class, student);
+        }
+        System.out.println(System.currentTimeMillis() - start);
+
     }
 }

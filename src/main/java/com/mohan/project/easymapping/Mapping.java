@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Mapping {
 
-    String source() default MappingStructConstant.DEFAULT_FIELD_NAME;
+    String source() default EasyMappingConstant.DEFAULT_FIELD_NAME;
 
     /**
      * -1 该属性失效

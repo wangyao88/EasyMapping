@@ -1,4 +1,4 @@
-package com.mohan.project.easymapping.mapping;
+package com.mohan.project.easymapping.mapping.reflect;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -11,19 +11,19 @@ import java.util.Optional;
  * @author WangYao
  * @since 2019-08-23 13:36:23
  */
-public final class SmartMapping {
+public final class SmartReflectMapping {
 
     private final Object lock = new Object();
 
-    private SmartMapping() {
+    private SmartReflectMapping() {
     }
 
     private static class Single {
-        private static final SmartMapping SMART_MAPPING = new SmartMapping();
+        private static final SmartReflectMapping SMART_REFLECT_MAPPING = new SmartReflectMapping();
     }
 
-    public static SmartMapping getInstance() {
-        return Single.SMART_MAPPING;
+    public static SmartReflectMapping getInstance() {
+        return Single.SMART_REFLECT_MAPPING;
     }
 
     public <T> Optional<T> mapping(Object target, List<Object> sources) {

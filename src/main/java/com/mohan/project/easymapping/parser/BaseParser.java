@@ -55,12 +55,12 @@ public class BaseParser implements Parser {
     }
 
     @Override
-    public void doParse(String path) {
+    public void doParse(String basePackage) {
         try {
             MAPPING_MAP.clear();
             TARGET_SOURCES_MAP.clear();
             errorMessages = Lists.newArrayList();
-            Reflections reflections = new Reflections(path);
+            Reflections reflections = new Reflections(basePackage);
             Set<Class<?>> mappingStructTypes = reflections.getTypesAnnotatedWith(MappingStruct.class);
             for (Class<?> mappingStructType : mappingStructTypes) {
                 String name = mappingStructType.getName();

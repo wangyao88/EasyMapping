@@ -1,6 +1,8 @@
 package com.mohan.project.easymapping.mapping;
 
 import com.mohan.project.easymapping.MappingParameter;
+import com.mohan.project.easymapping.mapping.reflect.NormalReflectMapping;
+import com.mohan.project.easymapping.mapping.reflect.SmartReflectMapping;
 import com.mohan.project.easymapping.parser.BaseParser;
 import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
@@ -16,18 +18,7 @@ import java.util.stream.Collectors;
  * @author WangYao
  * @since 2019-08-23 13:36:23
  */
-public final class BaseMapping implements Mapping {
-
-    private static class Single {
-        private static final Mapping MAPPING = new BaseMapping();
-    }
-
-    private BaseMapping() {
-    }
-
-    public static Mapping getInstance() {
-        return Single.MAPPING;
-    }
+public abstract class BaseMapping implements Mapping {
 
     @Override
     public void mapping(boolean useSmartMode, Object target, Object... sources) {
@@ -61,7 +52,7 @@ public final class BaseMapping implements Mapping {
             return Optional.empty();
         }
         if(useSmartMode) {
-            return SmartMapping.getInstance().mapping(target, filteredSources);
+            return doSmartMapping(target, filteredSources);
         }
         String targetClassName = target.getClass().getName();
         Map<String, Collection<MappingParameter>> parsedMappingInfo = BaseParser.getInstance().getParsedMappingInfo();
@@ -70,8 +61,12 @@ public final class BaseMapping implements Mapping {
             LogTools.warn("解析信息中不包含{}！请确认该类是否增加了MappingStruct注解！", targetClassName);
             return Optional.empty();
         }
-        return NormalMapping.getInstance().mapping(target, filteredSources, mappingParameters);
+        return doNormalMapping(target, filteredSources, mappingParameters);
     }
+
+    protected abstract <T> Optional<T> doSmartMapping(Object target, List<Object> sources);
+
+    protected abstract <T> Optional<T> doNormalMapping(Object target, List<Object> sources, Collection<MappingParameter> mappingParameters);
 
     private boolean valid(boolean useSmartMode, Object target, List<Object> sources) {
         List<String> errorMessage = BaseParser.getInstance().getErrorMessage();

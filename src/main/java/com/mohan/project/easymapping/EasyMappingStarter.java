@@ -10,24 +10,24 @@ import com.mohan.project.easytools.log.LogTools;
  * @author WangYao
  * @since 2019-08-23 13:36:23
  */
-public final class MappingStructStarter {
+public final class EasyMappingStarter {
 
     private volatile static boolean parsed = false;
     private static Throwable throwable;
 
     public static final Object LOCK = new Object();
 
-    private MappingStructStarter() {
+    private EasyMappingStarter() {
 
     }
 
-    public static void start(String scanPath) {
+    public static void start(String basePackage) {
         try {
             synchronized (LOCK) {
                 if(parsed) {
                     throw new OnceStartException();
                 }
-                BaseParser.getInstance().doParse(scanPath);
+                BaseParser.getInstance().doParse(basePackage);
                 parsed = true;
             }
         } catch (Exception e) {
@@ -47,7 +47,7 @@ public final class MappingStructStarter {
             return false;
         }
         if (!parsed && !useSmartMode) {
-            LogTools.error("尚未解析MappingStruct注解！无法映射！请先调用MappingStructStarter.start(String scanPath)方法");
+            LogTools.error("尚未解析MappingStruct注解！无法映射！请先调用MappingStructStarter.start(String basePackage)方法");
             return false;
         }
         return true;

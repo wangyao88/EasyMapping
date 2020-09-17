@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public interface Parser {
 
-    void doParse(String path);
+    void doParse(String basePackage);
 
     Map<String, Collection<MappingParameter>> getParsedMappingInfo();
 
