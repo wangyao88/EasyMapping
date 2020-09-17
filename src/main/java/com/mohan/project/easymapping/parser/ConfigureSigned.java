@@ -24,7 +24,7 @@ import java.util.Optional;
  * @since 2019-08-23 13:36:23
  */
 @Config
-public class ConfigurationSigned extends BaseConfiguration implements Configuration {
+public class ConfigureSigned extends BaseConfiguration implements Configuration {
 
     @Override
     public List<MappingParameter> config(ParserParameter parserParameter) {
@@ -52,9 +52,16 @@ public class ConfigurationSigned extends BaseConfiguration implements Configurat
         CustomerGenerator customerGenerator = targetField.getAnnotation(CustomerGenerator.class);
         if(ObjectTools.isNotNull(customerGenerator)) {
             try {
+                boolean needSourceField = customerGenerator.needSourceField();
                 Generator generator = customerGenerator.customerGenerator().newInstance();
                 mappingParameter.setGenerator(generator);
-                mappingParameter.setNeedSourceField(customerGenerator.needSourceField());
+                mappingParameter.setNeedSourceField(needSourceField);
+                if(needSourceField) {
+                    ConfigureSourceStatus configureSourceStatus = configureSource(mapping, parserParameter, targetFieldName, mappingParameter);
+                    if(configureSourceStatus != ConfigureSourceStatus.CONFIGURED) {
+                        //TODO 客户自定义属性值生成器，源字段解析失败，如何做
+                    }
+                }
                 return Optional.of(mappingParameter);
             } catch (Exception e) {
                 throw new InitializeCustomerGeneratorException(e);
@@ -65,9 +72,29 @@ public class ConfigurationSigned extends BaseConfiguration implements Configurat
             mappingParameter.setGeneratorType(generatorType);
             return Optional.of(mappingParameter);
         }
+
+        ConfigureSourceStatus configureSourceStatus = configureSource(mapping, parserParameter, targetFieldName, mappingParameter);
+        if(ConfigureSourceStatus.MISS_INDEX == configureSourceStatus) {
+            return Optional.empty();
+        }
+        if(ConfigureSourceStatus.CONFIGURED == configureSourceStatus) {
+            return Optional.of(mappingParameter);
+        }
+        String source = mapping.source();
+        String sourceFieldName = MappingStructConstant.DEFAULT_FIELD_NAME.equals(source) ? targetFieldName : source;
+        if(ConfigureSourceStatus.MISS_ATTRIBUTE == configureSourceStatus) {
+            if (parserParameter.isIgnoreMissing()) {
+                return Optional.empty();
+            }
+            throw new AttributeNotExistException(sourceFieldName);
+        }
+        throw new AttributeNotExistException(sourceFieldName);
+    }
+
+    private ConfigureSourceStatus configureSource(Mapping mapping, ParserParameter parserParameter, String targetFieldName, MappingParameter mappingParameter) {
         int index = mapping.index();
         if(index != MappingStructConstant.DEFAULT_FIELD_INDEX && index != parserParameter.getSourceIndex()) {
-            return Optional.empty();
+            return ConfigureSourceStatus.MISS_INDEX;
         }
         String source = mapping.source();
         String sourceFieldName = MappingStructConstant.DEFAULT_FIELD_NAME.equals(source) ? targetFieldName : source;
@@ -76,16 +103,18 @@ public class ConfigurationSigned extends BaseConfiguration implements Configurat
             mappingParameter.setSources(sourceFieldOptional.get());
             mappingParameter.setSourceClassName(parserParameter.getSource().getName());
             mappingParameter.setConvertType(mapping.convert());
-            return Optional.of(mappingParameter);
+            return ConfigureSourceStatus.CONFIGURED;
         }
-        if (parserParameter.isIgnoreMissing()) {
-            return Optional.empty();
-        }
-        throw new AttributeNotExistException(sourceFieldName);
+        return ConfigureSourceStatus.MISS_ATTRIBUTE;
     }
 
     @Override
     public ConfigurationType getType() {
         return ConfigurationType.SIGNED;
+    }
+
+    private static enum ConfigureSourceStatus {
+
+        MISS_INDEX, CONFIGURED, MISS_ATTRIBUTE;
     }
 }

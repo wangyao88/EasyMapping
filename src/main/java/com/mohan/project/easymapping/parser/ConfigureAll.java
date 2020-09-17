@@ -23,7 +23,7 @@ import java.util.Optional;
  * @since 2019-08-23 13:36:23
  */
 @Config
-public class ConfigurationAll extends BaseConfiguration implements Configuration {
+public class ConfigureAll extends BaseConfiguration implements Configuration {
 
     @Override
     public List<MappingParameter> config(ParserParameter parserParameter) {
@@ -50,24 +50,36 @@ public class ConfigurationAll extends BaseConfiguration implements Configuration
         CustomerGenerator customerGenerator = needMappingField.getAnnotation(CustomerGenerator.class);
         if(ObjectTools.isNotNull(customerGenerator)) {
             try {
+                boolean needSourceField = customerGenerator.needSourceField();
                 Generator generator = customerGenerator.customerGenerator().newInstance();
                 mappingParameter.setGenerator(generator);
-                mappingParameter.setNeedSourceField(customerGenerator.needSourceField());
+                mappingParameter.setNeedSourceField(needSourceField);
+                if(needSourceField) {
+                    configureSource(parserParameter, mappingParameter, sourceFieldName);
+                }
                 return Optional.of(mappingParameter);
             } catch (Exception e) {
                 throw new InitializeCustomerGeneratorException(e);
             }
         }
-        Optional<List<Field>> sourceFieldOptional = getSourceField(sourceFieldName, parserParameter.getSourceFields());
-        if (sourceFieldOptional.isPresent() && CollectionTools.isNotEmpty(sourceFieldOptional.get())) {
-            mappingParameter.setSources(sourceFieldOptional.get());
-            mappingParameter.setSourceClassName(parserParameter.getSource().getName());
+        boolean configureSource = configureSource(parserParameter, mappingParameter, sourceFieldName);
+        if(configureSource) {
             return Optional.of(mappingParameter);
         }
         if (parserParameter.isIgnoreMissing()) {
             return Optional.empty();
         }
         throw new AttributeNotExistException(sourceFieldName);
+    }
+
+    private boolean configureSource(ParserParameter parserParameter,  MappingParameter mappingParameter, String sourceFieldName) {
+        Optional<List<Field>> sourceFieldOptional = getSourceField(sourceFieldName, parserParameter.getSourceFields());
+        if (sourceFieldOptional.isPresent() && CollectionTools.isNotEmpty(sourceFieldOptional.get())) {
+            mappingParameter.setSources(sourceFieldOptional.get());
+            mappingParameter.setSourceClassName(parserParameter.getSource().getName());
+            return true;
+        }
+        return false;
     }
 
     @Override
