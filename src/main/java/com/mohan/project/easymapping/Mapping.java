@@ -26,7 +26,7 @@ public @interface Mapping {
      * 0对应@MappingStruct注解的source属性数组的第一个元素，1对应第二个元素，以此类推
      * @return 该属性来源于@MappingStruct注解的source数组元素的下标
      */
-    int index() default -1;
+    int index() default EasyMappingConstant.DEFAULT_FIELD_INDEX;
 
     ConvertType convert() default ConvertType.NONE;
 

@@ -8,6 +8,7 @@ import javassist.*;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 实体属性映射器
@@ -62,7 +63,7 @@ public final class SmartByteCodeMapping extends BaseByteCodeMapping {
             }
 
             CtClass abstractSetterClazz = pool.getCtClass(AbstractSetter.class.getName());
-            final String setterImplClazzName = joinedClassName + "Setter";
+            final String setterImplClazzName = joinedClassName + "SmartSetter";
             CtClass setterClazz = pool.makeClass(setterImplClazzName, abstractSetterClazz);
 
             CtConstructor constructor = new CtConstructor(new CtClass[0], setterClazz);
@@ -87,22 +88,31 @@ public final class SmartByteCodeMapping extends BaseByteCodeMapping {
         setMethodStr.append(targetClassName)
                 .append(" realTarget = (")
                 .append(targetClassName)
-                .append(")target;\n");
-        List<String> targetFieldNames = getFieldNames(target);
+                .append(")target;")
+                .append(StringTools.LINE_BREAK);
+        List<Field> targetFields = getFieldNames(target);
         int size = sources.size();
-        for (String targetFieldName : targetFieldNames) {
+        for (Field targetField : targetFields) {
+            String targetFieldName = targetField.getName();
             for (int i = 0; i < size; i++) {
                 Object currentSource = sources.get(i);
-                List<String> sourceFieldNames = getFieldNames(currentSource);
-                if(sourceFieldNames.contains(targetFieldName)) {
+                List<Field> sourceFields = getFieldNames(currentSource);
+                Optional<Field> fieldOptional = sourceFields.stream().filter(field -> field.getName().equals(targetFieldName) && field.getType() == targetField.getType()).findFirst();
+                if(fieldOptional.isPresent()) {
                     String currentSourceClassName = currentSource.getClass().getName();
-                    setMethodStr.append("realTarget.set")
+                    setMethodStr.append("try{")
+                            .append(StringTools.LINE_BREAK)
+                            .append("realTarget.set")
                             .append(StringTools.toUpperCaseFirstOne(targetFieldName))
                             .append("(")
                             .append("((").append(currentSourceClassName).append(")sources.get(").append(i).append("))")
                             .append(".get").append(StringTools.toUpperCaseFirstOne(targetFieldName))
                             .append("()")
                             .append(");")
+                            .append(StringTools.LINE_BREAK)
+                            .append("}catch (Exception e) {")
+                            .append(StringTools.LINE_BREAK)
+                            .append("}")
                             .append(StringTools.LINE_BREAK);
                     break;
                 }

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class BaseByteCodeMapping extends BaseMapping {
 
     protected static final Map<String, AbstractSetter> SETTER_MAP = Maps.newConcurrentMap();
-    protected static final Map<String, List<String>> TARGET_FIELD_NAME_MAP = Maps.newConcurrentMap();
+    protected static final Map<String, List<Field>> TARGET_FIELD_NAME_MAP = Maps.newConcurrentMap();
 
     @Override
     protected <T> Optional<T> doSmartMapping(Object target, List<Object> sources) {
@@ -38,17 +38,17 @@ public class BaseByteCodeMapping extends BaseMapping {
         SETTER_MAP.put(joinedClassName, setter);
     }
 
-    protected List<String> getFieldNames(Object object) {
+    protected List<Field> getFieldNames(Object object) {
         String targetName = object.getClass().getName();
-        List<String> fieldNames = TARGET_FIELD_NAME_MAP.get(targetName);
+        List<Field> fieldNames = TARGET_FIELD_NAME_MAP.get(targetName);
         if(CollectionTools.isEmpty(fieldNames)) {
-            fieldNames = Arrays.stream(object.getClass().getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
+            fieldNames = Arrays.stream(object.getClass().getDeclaredFields()).collect(Collectors.toList());
             putFieldNames(targetName, fieldNames);
         }
         return fieldNames;
     }
 
-    protected void putFieldNames(String className, List<String> fieldNames) {
+    protected void putFieldNames(String className, List<Field> fieldNames) {
         TARGET_FIELD_NAME_MAP.put(className, fieldNames);
     }
 }

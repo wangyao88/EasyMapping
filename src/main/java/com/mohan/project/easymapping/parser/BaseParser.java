@@ -103,7 +103,7 @@ public class BaseParser implements Parser {
             System.out.println(name);
             Collection<MappingParameter> mappingParameters = MAPPING_MAP.get(name);
             for (MappingParameter mappingParameter : mappingParameters) {
-                System.out.println(mappingParameter.toString());
+                StringTools.printObject(mappingParameter);
             }
         }
     }

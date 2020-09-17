@@ -27,7 +27,7 @@ public class User {
     @Mapping(generator = GeneratorType.NOW_LOCAL_DATE)
     private LocalDate date;
 
-    @Mapping(source = "address")
+    @Mapping(source = "address.value")
     @CustomerGenerator(needSourceField = true, customerGenerator = AddressCustomerGenerator.class)
     private String address;
 

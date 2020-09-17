@@ -9,7 +9,7 @@ public class Student {
     private String id;
     private String sName;
     private Double score;
-    private String address;
+    private Address address;
 
     public String getId() {
         return id;
@@ -35,11 +35,11 @@ public class Student {
         this.score = score;
     }
 
-    public String getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 }

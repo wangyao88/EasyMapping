@@ -6,12 +6,11 @@ import com.mohan.project.easymapping.EasyMappingConstant;
 import com.mohan.project.easymapping.MappingParameter;
 import com.mohan.project.easymapping.convert.ConvertType;
 import com.mohan.project.easymapping.convert.Converts;
-import com.mohan.project.easymapping.exception.ConfigureTargetFieldFromSourceValueException;
 import com.mohan.project.easymapping.exception.MappingIndexOutOfBoundsException;
-import com.mohan.project.easymapping.exception.ObtainSourceFieldValueException;
 import com.mohan.project.easymapping.generator.Generator;
 import com.mohan.project.easymapping.generator.GeneratorType;
 import com.mohan.project.easymapping.generator.Generators;
+import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
@@ -19,7 +18,6 @@ import javassist.*;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,10 +51,10 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
     private AbstractSetter getSetter(Object target, List<Object> sources, List<MappingParameter> mappingParameters) {
         String joinedClassName = getJoinedClassName(target, sources);
         AbstractSetter setter = SETTER_MAP.get(joinedClassName);
-        if(ObjectTools.isNull(setter)) {
+        if (ObjectTools.isNull(setter)) {
             synchronized (lock) {
                 setter = SETTER_MAP.get(joinedClassName);
-                if(ObjectTools.isNull(setter)) {
+                if (ObjectTools.isNull(setter)) {
                     setter = createSetter(joinedClassName, target, sources, mappingParameters);
                     putSetter(joinedClassName, setter);
                 }
@@ -80,9 +78,12 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
             pool.importPackage(Generators.class.getName());
             pool.importPackage(GeneratorType.class.getName());
             pool.importPackage(Generator.class.getName());
+            pool.importPackage(ConvertType.class.getName());
+            pool.importPackage(Converts.class.getName());
+            pool.importPackage(NormalByteCodeMapping.class.getName());
 
             CtClass abstractSetterClazz = pool.getCtClass(AbstractSetter.class.getName());
-            final String setterImplClazzName = joinedClassName + "Setter";
+            final String setterImplClazzName = joinedClassName + "NormalSetter";
             CtClass setterClazz = pool.makeClass(setterImplClazzName, abstractSetterClazz);
 
             CtConstructor constructor = new CtConstructor(new CtClass[0], setterClazz);
@@ -91,10 +92,8 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
 
             configureMethodBody(target, sources, mappingParameters, setterClazz);
 
-            setterClazz.writeFile();
-
             Class<?> javaClazz = setterClazz.toClass();
-            return  (AbstractSetter) javaClazz.newInstance();
+            return (AbstractSetter) javaClazz.newInstance();
         } catch (Exception e) {
             LogTools.error("生成Setter字节码失败！", e);
             return null;
@@ -126,21 +125,23 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
                     .append(StringTools.LINE_BREAK);
 
             Generator generator = mappingParameter.getGenerator();
-//            Object sourceValue = null;
             if (Generator.isNotDefault(generator)) {
                 if (mappingParameter.isNeedSourceField()) {
-//                    sourceValue = getSourceFieldValue(sources, mappingParameter);
-                    setMethodStr.append("Object sourceValue").append(i).append(" = \"wy\";")
-                            .append(StringTools.LINE_BREAK)
-                            .append("Generator generator").append(i).append(" = mappingParameter").append(i).append(".getGenerator();")
-                            .append(StringTools.LINE_BREAK)
-                            .append("Object customerGenerateValue").append(i).append(" = generator").append(i).append(".doGenerate(sourceValue").append(i).append(");")
-                            .append(StringTools.LINE_BREAK)
-                            .append("realTarget.set")
-                            .append(StringTools.toUpperCaseFirstOne(targetFieldName))
-                            .append("((").append(type.getName()).append(")customerGenerateValue").append(i).append(");")
+                    String sourceValueStr = getSourceFieldValueStr(i, sources, mappingParameters);
+                    setMethodStr.append(sourceValueStr).append(StringTools.LINE_BREAK);
+                } else {
+                    setMethodStr.append("Object sourceValue").append(i).append(" = null;")
                             .append(StringTools.LINE_BREAK);
                 }
+                setMethodStr.append(StringTools.LINE_BREAK)
+                        .append("Generator generator").append(i).append(" = mappingParameter").append(i).append(".getGenerator();")
+                        .append(StringTools.LINE_BREAK)
+                        .append("Object customerGenerateValue").append(i).append(" = generator").append(i).append(".doGenerate(sourceValue").append(i).append(");")
+                        .append(StringTools.LINE_BREAK)
+                        .append("realTarget.set")
+                        .append(StringTools.toUpperCaseFirstOne(targetFieldName))
+                        .append("((").append(type.getName()).append(")customerGenerateValue").append(i).append(");")
+                        .append(StringTools.LINE_BREAK);
                 continue;
             }
 
@@ -157,52 +158,134 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
                 continue;
             }
 
-//            sourceValue = getSourceFieldValue(sources, mappingParameter);
-//            if (ObjectTools.isNotNull(sourceValue)) {
-//                setTargetFieldValue(target, targetField, sourceValue, mappingParameter);
-//            }
+            String sourceValueStr = getSourceFieldValueStr(i, sources, mappingParameters);
+            setMethodStr.append(sourceValueStr)
+                    .append("realTarget.set")
+                    .append(StringTools.toUpperCaseFirstOne(targetFieldName))
+                    .append("((").append(type.getName()).append(")sourceValue").append(i).append(");")
+                    .append(StringTools.LINE_BREAK);
         }
 
         setMethodStr.append("}");
-
-        System.out.println(setMethodStr.toString());
 
         CtMethod cm = CtNewMethod.make(setMethodStr.toString(), setterClazz);
         setterClazz.addMethod(cm);
     }
 
-    private Object getSourceFieldValue(List<Object> sources, MappingParameter mappingParameter) {
-        Object sourceValue = null;
-        ConvertType convertType = mappingParameter.getConvertType();
-        int index = mappingParameter.getIndex();
+    private String getSourceFieldValueStr(int mappingParametersIndex, List<Object> sources, List<MappingParameter> mappingParameters) {
+        final StringBuilder getSourceFieldValueStr = new StringBuilder();
+        String sourceValue = "sourceValue" + mappingParametersIndex;
+        getSourceFieldValueStr.append("Object ")
+                .append(sourceValue)
+                .append(" = null;")
+                .append(StringTools.LINE_BREAK);
+        MappingParameter currentMappingParameter = mappingParameters.get(mappingParametersIndex);
+        String mappingParameter = "mappingParameter" + mappingParametersIndex;
+        String convertType = "convertType" + mappingParametersIndex;
+        getSourceFieldValueStr.append("ConvertType ")
+                .append(convertType)
+                .append(" = ")
+                .append(mappingParameter)
+                .append(".getConvertType();")
+                .append(StringTools.LINE_BREAK);
+
+        List<Field> sourcesFieldList = currentMappingParameter.getSources();
+        int index = currentMappingParameter.getIndex();
+        int sourceSize = sources.size();
         if (index != EasyMappingConstant.DEFAULT_FIELD_INDEX) {
-            if (index > sources.size() - 1 && !mappingParameter.isIgnoreException()) {
-                String msg = configureMappingIndexOutOfBoundsException(sources.size(), mappingParameter);
+            if (index > sourceSize - 1 && !currentMappingParameter.isIgnoreException()) {
+                String msg = configureMappingIndexOutOfBoundsException(sourceSize, currentMappingParameter);
                 throw new MappingIndexOutOfBoundsException(msg);
             }
             Object source = sources.get(index);
-            Iterator<Field> sourceFieldIterator = mappingParameter.getSources().iterator();
-            sourceValue = recursiveGetSourceFieldValue(sourceFieldIterator, source);
-            if (ConvertType.NONE != convertType) {
-                sourceValue = Converts.convert(convertType, sourceValue);
-            }
-            return sourceValue;
+
+            String sourceValueStr = doGetSourceFieldValue(sourceValue, sourcesFieldList, source, index);
+            getSourceFieldValueStr.append(sourceValueStr).append(StringTools.LINE_BREAK);
+
+            getSourceFieldValueStr.append("if (ConvertType.NONE != ").append(convertType).append(") {")
+                    .append(StringTools.LINE_BREAK)
+                    .append(sourceValue)
+                    .append(" = Converts.convert(")
+                    .append(convertType)
+                    .append(", ")
+                    .append(sourceValue)
+                    .append(");")
+                    .append(StringTools.LINE_BREAK)
+                    .append("}")
+                    .append(StringTools.LINE_BREAK);
+            return getSourceFieldValueStr.toString();
         }
-        String sourceClassName = mappingParameter.getSourceClassName();
-        for (Object source : sources) {
+
+
+        getSourceFieldValueStr.append("String sourceClassName = ")
+                .append(mappingParameter)
+                .append(".getSourceClassName();")
+                .append(StringTools.LINE_BREAK)
+                .append("int sourceSize = sources.size();")
+                .append(StringTools.LINE_BREAK)
+                .append("for (int i = 0; i < sourceSize; i++) {")
+                .append(StringTools.LINE_BREAK)
+                .append("Object source = sources.get(i);")
+                .append(StringTools.LINE_BREAK)
+                .append("if (!source.getClass().getName().equals(sourceClassName)) {")
+                .append(StringTools.LINE_BREAK)
+                .append("continue;")
+                .append(StringTools.LINE_BREAK)
+                .append("}")
+                .append(StringTools.LINE_BREAK);
+
+        String sourceClassName = currentMappingParameter.getSourceClassName();
+        for (int i = 0; i < sourceSize; i++) {
+            Object source = sources.get(i);
             if (!source.getClass().getName().equals(sourceClassName)) {
                 continue;
             }
-            Iterator<Field> sourceFieldIterator = mappingParameter.getSources().iterator();
-            sourceValue = recursiveGetSourceFieldValue(sourceFieldIterator, source);
-            if (ConvertType.NONE != convertType) {
-                sourceValue = Converts.convert(convertType, sourceValue);
-            }
-            if (sourceValue != null) {
-                break;
-            }
+            String sourceValueStr = doGetSourceFieldValue(sourceValue, sourcesFieldList, source, i);
+            getSourceFieldValueStr.append(sourceValueStr).append(StringTools.LINE_BREAK);
+            getSourceFieldValueStr.append("if (ConvertType.NONE != ").append(convertType).append(") {")
+                    .append(StringTools.LINE_BREAK)
+                    .append(sourceValue).append(" = Converts.convert(").append(convertType).append(", ").append(sourceValue).append(");")
+                    .append(StringTools.LINE_BREAK)
+                    .append("}")
+                    .append(StringTools.LINE_BREAK)
+                    .append(" if (").append(sourceValue).append(" != null) {")
+                    .append(StringTools.LINE_BREAK)
+                    .append(" break;")
+                    .append(StringTools.LINE_BREAK)
+                    .append("}")
+                    .append(StringTools.LINE_BREAK)
+                    .append("}")
+                    .append(StringTools.LINE_BREAK);
         }
-        return sourceValue;
+        return getSourceFieldValueStr.toString();
+    }
+
+    private static String doGetSourceFieldValue(String sourceValue, List<Field> sourcesFieldList, Object source, int index) {
+        if (CollectionTools.isEmpty(sourcesFieldList)) {
+            return StringTools.EMPTY;
+        }
+        String sourceClassName = source.getClass().getName();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("try {")
+                .append(StringTools.LINE_BREAK)
+                .append(sourceValue)
+                .append(" = ")
+                .append("((").append(sourceClassName).append(")sources.get(").append(index).append("))");
+
+        for (Field field : sourcesFieldList) {
+            String fieldName = field.getName();
+            Class<?> fieldType = field.getType();
+            stringBuilder.append(".get").append(StringTools.toUpperCaseFirstOne(fieldName)).append("()");
+        }
+        stringBuilder.append(";")
+                .append(StringTools.LINE_BREAK)
+                .append("}catch (Exception e) {")
+                .append(StringTools.LINE_BREAK)
+                .append(sourceValue)
+                .append(" = null;")
+                .append(StringTools.LINE_BREAK)
+                .append("}");
+        return stringBuilder.toString();
     }
 
     private String configureMappingIndexOutOfBoundsException(int length, MappingParameter mappingParameter) {
@@ -214,48 +297,5 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
                 .append("，index为")
                 .append(mappingParameter.getIndex());
         return msg.toString();
-    }
-
-    private Object recursiveGetSourceFieldValue(Iterator<Field> sourceFieldIterator, Object source) {
-        if(source == null) {
-            return null;
-        }
-        if (sourceFieldIterator.hasNext()) {
-            Field sourceField = sourceFieldIterator.next();
-            Object sourceValue = null;
-            synchronized (lock) {
-                try {
-                    sourceField.setAccessible(true);
-                    sourceValue = sourceField.get(source);
-                } catch (Exception e) {
-                    throw new ObtainSourceFieldValueException(source, sourceField, e);
-                }
-            }
-            if (!sourceFieldIterator.hasNext()) {
-                return sourceValue;
-            }
-            return recursiveGetSourceFieldValue(sourceFieldIterator, sourceValue);
-        }
-        return null;
-    }
-
-    private void setTargetFieldValue(Object target, Field targetField, Object sourceValue, MappingParameter mappingParameter) {
-        if (ObjectTools.isAnyNull(target, targetField, sourceValue)) {
-            return;
-        }
-        //TODO 校验数据类型是否匹配
-//        if (sourceValue.getClass().isAssignableFrom(targetField.getType())) {
-//
-//        }
-        synchronized (lock) {
-            try {
-                targetField.setAccessible(true);
-                targetField.set(target, sourceValue);
-            } catch (Exception e) {
-                if (!mappingParameter.isIgnoreException()) {
-                    throw new ConfigureTargetFieldFromSourceValueException(target, targetField, sourceValue, e);
-                }
-            }
-        }
     }
 }
