@@ -26,11 +26,6 @@
 			<version>0.9.11</version>
 		</dependency>
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.10</version>
-		</dependency>
-		<dependency>
 			<groupId>com.squareup</groupId>
 			<artifactId>javapoet</artifactId>
 			<version>1.13.0</version>

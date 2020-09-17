@@ -5,7 +5,6 @@ import com.mohan.project.easymapping.Mapping;
 import com.mohan.project.easymapping.MappingStruct;
 import com.mohan.project.easymapping.generator.AddressCustomerGenerator;
 import com.mohan.project.easymapping.generator.GeneratorType;
-import lombok.Data;
 
 import java.time.LocalDate;
 
@@ -13,7 +12,6 @@ import java.time.LocalDate;
  * @author WangYao
  * @since 2020-09-17 09:08
  */
-@Data
 @MappingStruct(source = {Student.class})
 public class User {
 
@@ -32,4 +30,44 @@ public class User {
     @Mapping(source = "address")
     @CustomerGenerator(needSourceField = true, customerGenerator = AddressCustomerGenerator.class)
     private String address;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getUName() {
+        return uName;
+    }
+
+    public void setUName(String uName) {
+        this.uName = uName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }
