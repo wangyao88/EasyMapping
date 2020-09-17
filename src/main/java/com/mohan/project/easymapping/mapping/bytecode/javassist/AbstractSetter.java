@@ -1,5 +1,7 @@
 package com.mohan.project.easymapping.mapping.bytecode.javassist;
 
+import com.mohan.project.easymapping.MappingParameter;
+
 import java.util.List;
 
 /**
@@ -8,14 +10,15 @@ import java.util.List;
  * @author WangYao
  * @since 2020-09-17 13:17
  */
-public abstract class AbstractSetter {
+public class AbstractSetter implements ISetter {
 
-    /**
-     * 设置属性
-     *
-     * @param target 目标实体实例
-     * @param sources 源实体实例集合
-     */
-    public abstract void doSet(Object target, List<Object> sources);
+    @Override
+    public void doSet(Object target, List<Object> sources) {
 
+    }
+
+    @Override
+    public void doSet(Object target, List<Object> sources, List<MappingParameter> mappingParameters) {
+
+    }
 }

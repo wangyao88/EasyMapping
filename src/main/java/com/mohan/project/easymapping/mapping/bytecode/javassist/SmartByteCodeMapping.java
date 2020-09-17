@@ -1,17 +1,13 @@
 package com.mohan.project.easymapping.mapping.bytecode.javassist;
 
-import com.mohan.project.easymapping.test.User;
-import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
 import javassist.*;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 实体属性映射器
@@ -19,7 +15,9 @@ import java.util.stream.Collectors;
  * @author WangYao
  * @since 2019-08-23 13:36:23
  */
-public final class SmartByteCodeMapping {
+public final class SmartByteCodeMapping extends BaseByteCodeMapping {
+
+    private final Object lock = new Object();
 
     private SmartByteCodeMapping() {
     }
@@ -33,17 +31,23 @@ public final class SmartByteCodeMapping {
     }
 
     public <T> Optional<T> mapping(Object target, List<Object> sources) {
-        String joinedClassName = BaseByteCodeMapping.getJoinedClassName(target, sources);
-        AbstractSetter setter = BaseByteCodeMapping.getSetter(joinedClassName);
-        if(ObjectTools.isNull(setter)) {
-            setter = createSetter(joinedClassName, target, sources);
-            if(ObjectTools.isNull(setter)) {
-                return Optional.empty();
-            }
-            BaseByteCodeMapping.putSetter(joinedClassName, setter);
-        }
-        setter.doSet(target, sources);
+        getSetter(target, sources).doSet(target, sources);
         return Optional.of((T) target);
+    }
+
+    private AbstractSetter getSetter(Object target, List<Object> sources) {
+        String joinedClassName = getJoinedClassName(target, sources);
+        AbstractSetter setter = SETTER_MAP.get(joinedClassName);
+        if(ObjectTools.isNull(setter)) {
+            synchronized (lock) {
+                setter = SETTER_MAP.get(joinedClassName);
+                if(ObjectTools.isNull(setter)) {
+                    setter = createSetter(joinedClassName, target, sources);
+                    putSetter(joinedClassName, setter);
+                }
+            }
+        }
+        return setter;
     }
 
     private AbstractSetter createSetter(String joinedClassName, Object target, List<Object> sources) {
@@ -56,7 +60,6 @@ public final class SmartByteCodeMapping {
             for (Object source : sources) {
                 pool.importPackage(source.getClass().getName());
             }
-            pool.importPackage(Field.class.getName());
 
             CtClass abstractSetterClazz = pool.getCtClass(AbstractSetter.class.getName());
             final String setterImplClazzName = joinedClassName + "Setter";
@@ -67,7 +70,6 @@ public final class SmartByteCodeMapping {
             setterClazz.addConstructor(constructor);
 
             configureMethodBody(target, sources, setterClazz);
-
 
             Class<?> javaClazz = setterClazz.toClass();
             return  (AbstractSetter) javaClazz.newInstance();
@@ -86,11 +88,12 @@ public final class SmartByteCodeMapping {
                 .append(" realTarget = (")
                 .append(targetClassName)
                 .append(")target;\n");
-        List<String> targetFieldNames = BaseByteCodeMapping.getFieldNames(target);
+        List<String> targetFieldNames = getFieldNames(target);
+        int size = sources.size();
         for (String targetFieldName : targetFieldNames) {
-            for (int i = 0; i < sources.size(); i++) {
+            for (int i = 0; i < size; i++) {
                 Object currentSource = sources.get(i);
-                List<String> sourceFieldNames = BaseByteCodeMapping.getFieldNames(currentSource);
+                List<String> sourceFieldNames = getFieldNames(currentSource);
                 if(sourceFieldNames.contains(targetFieldName)) {
                     String currentSourceClassName = currentSource.getClass().getName();
                     setMethodStr.append("realTarget.set")
