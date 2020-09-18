@@ -7,6 +7,8 @@ package com.mohan.project.easymapping;
  */
 public class EasyMappingConstant {
 
+    public static final String PROJECT_NAME = "EasyMapping";
+
     public static final String DEFAULT_FIELD_NAME = "Mapping_SAME_FIELD";
 
     public static final int DEFAULT_FIELD_INDEX = -1;

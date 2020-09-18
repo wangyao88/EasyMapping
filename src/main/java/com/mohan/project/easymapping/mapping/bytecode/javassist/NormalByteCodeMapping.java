@@ -175,8 +175,6 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
 
         setMethodStr.append("}");
 
-        System.out.println(setMethodStr);
-
         CtMethod cm = CtNewMethod.make(setMethodStr.toString(), setterClazz);
         setterClazz.addMethod(cm);
     }

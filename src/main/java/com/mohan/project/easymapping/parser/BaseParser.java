@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.mohan.project.easymapping.EasyMappingConstant;
 import com.mohan.project.easymapping.MappingParameter;
 import com.mohan.project.easymapping.MappingStruct;
 import com.mohan.project.easymapping.exception.MappingStructSourceNullException;
@@ -98,13 +99,15 @@ public class BaseParser implements Parser {
 
     @Override
     public void showMappingInfo() {
+        System.out.println(StringTools.HR + EasyMappingConstant.PROJECT_NAME + StringTools.HR);
         for (String name : MAPPING_MAP.keySet()) {
-            System.out.println(StringTools.HR);
-            System.out.println(name);
             Collection<MappingParameter> mappingParameters = MAPPING_MAP.get(name);
+            System.out.println(name + "     " + mappingParameters.size());
             for (MappingParameter mappingParameter : mappingParameters) {
                 StringTools.printObject(mappingParameter);
             }
+            System.out.println(StringTools.HR);
         }
+        System.out.println();
     }
 }

@@ -23,7 +23,7 @@ public class User {
     private String id;
 
     /**
-     * 指定了index 用Student类型的最后一个实例的sex属性进行设值
+     * 指定了index 用Student类型的第一个实例的sex属性进行设值
      */
     @Mapping(index = 0)
     private String sex;
@@ -37,7 +37,7 @@ public class User {
     @Mapping(generator = GeneratorType.NOW_LOCAL_DATE)
     private LocalDate date;
 
-    @Mapping(source = "address.value", index = -1)
+    @Mapping(source = "address.value")
     @CustomerGenerator(needSourceField = true, customerGenerator = AddressCustomerGenerator.class)
     private String address;
 
