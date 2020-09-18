@@ -18,6 +18,8 @@ import java.util.concurrent.Executors;
  */
 public class MappingTest {
 
+    public static final int BATCH_SIZE = 3000000;
+
     @Before
     public void init() {
         EasyMappingStarter.start("com.mohan.project.easymapping.test");
@@ -25,12 +27,12 @@ public class MappingTest {
 
     @Test
     public void batchNormalTest() {
-        CountDownLatch countDownLatch = new CountDownLatch(3000000);
+        CountDownLatch countDownLatch = new CountDownLatch(BATCH_SIZE);
         long start = System.currentTimeMillis();
         ExecutorService executorService = Executors.newFixedThreadPool(8);
         Address address = new Address();
         address.setValue("北京");
-        for (int i = 0; i < 3000000; i++) {
+        for (int i = 0; i < BATCH_SIZE; i++) {
             executorService.submit(() -> {
                 Student student = new Student();
                 student.setId("1");
@@ -58,12 +60,12 @@ public class MappingTest {
 
     @Test
     public void batchFastNormalTest() {
-        CountDownLatch countDownLatch = new CountDownLatch(3000000);
+        CountDownLatch countDownLatch = new CountDownLatch(BATCH_SIZE);
         long start = System.currentTimeMillis();
         ExecutorService executorService = Executors.newFixedThreadPool(8);
         Address address = new Address();
         address.setValue("北京");
-        for (int i = 0; i < 3000000; i++) {
+        for (int i = 0; i < BATCH_SIZE; i++) {
             executorService.submit(() -> {
                 Student student = new Student();
                 student.setId("1");
@@ -91,12 +93,12 @@ public class MappingTest {
 
     @Test
     public void batchSmartMappingTest() {
-        CountDownLatch countDownLatch = new CountDownLatch(3000000);
+        CountDownLatch countDownLatch = new CountDownLatch(BATCH_SIZE);
         long start = System.currentTimeMillis();
         ExecutorService executorService = Executors.newFixedThreadPool(8);
         Address address = new Address();
         address.setValue("北京");
-        for (int i = 0; i < 3000000; i++) {
+        for (int i = 0; i < BATCH_SIZE; i++) {
             executorService.submit(() -> {
                 Student student = new Student();
                 student.setId("1");
@@ -119,12 +121,12 @@ public class MappingTest {
 
     @Test
     public void batchFastSmartMappingTest() {
-        CountDownLatch countDownLatch = new CountDownLatch(3000000);
+        CountDownLatch countDownLatch = new CountDownLatch(BATCH_SIZE);
         long start = System.currentTimeMillis();
         ExecutorService executorService = Executors.newFixedThreadPool(8);
         Address address = new Address();
         address.setValue("北京");
-        for (int i = 0; i < 3000000; i++) {
+        for (int i = 0; i < BATCH_SIZE; i++) {
             executorService.submit(() -> {
                 Student student = new Student();
                 student.setId("1");
