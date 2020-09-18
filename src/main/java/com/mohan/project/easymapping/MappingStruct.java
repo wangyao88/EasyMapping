@@ -16,7 +16,7 @@ public @interface MappingStruct {
 
     Class<?>[] source();
 
-    boolean ignoreMissing() default false;
+    boolean ignoreMissing() default true;
 
     /**
      * 忽略属性映射时发生的异常

@@ -58,7 +58,7 @@ public abstract class BaseMapping implements Mapping {
         Map<String, Collection<MappingParameter>> parsedMappingInfo = BaseParser.getInstance().getParsedMappingInfo();
         Collection<MappingParameter> mappingParameters = parsedMappingInfo.get(targetClassName);
         if (CollectionTools.isEmpty(mappingParameters)) {
-            LogTools.warn("解析信息中不包含{}！请确认该类是否增加了MappingStruct注解！", targetClassName);
+            LogTools.warn("解析信息中不包含{0}！请确认该类是否增加了MappingStruct注解！", targetClassName);
             return Optional.empty();
         }
         return doNormalMapping(target, filteredSources, mappingParameters);
@@ -85,12 +85,12 @@ public abstract class BaseMapping implements Mapping {
         Map<String, Collection<String>> targetSourcesInfoMap = BaseParser.getInstance().getTargetSourcesInfo();
         Collection<String> sourcesClassName = targetSourcesInfoMap.get(targetName);
         if (CollectionTools.isEmpty(sourcesClassName)) {
-            LogTools.error("未找到[{}]相关@MappingStruct的配置信息！", targetName);
+            LogTools.error("未找到[{0}]相关@MappingStruct的配置信息！", targetName);
             return false;
         }
         for (Object source : sources) {
             if (!sourcesClassName.contains(source.getClass().getName())) {
-                LogTools.error("[{}]的@MappingStruct注解中未包含[{}]的源信息", targetName, source.getClass().getName());
+                LogTools.error("[{0}]的@MappingStruct注解中未包含[{1}]的源信息", targetName, source.getClass().getName());
                 return false;
             }
         }

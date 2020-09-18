@@ -12,11 +12,21 @@ import java.time.LocalDate;
  * @author WangYao
  * @since 2020-09-17 09:08
  */
-@MappingStruct(source = {Student.class})
+@MappingStruct(source = {Student.class, Person.class})
 public class User {
 
+    /**
+     * 未指定index 会使用@MappingStruct(source = {Student.class, Person.class})
+     * source数组中最后一个匹配的元素的属性进行设值
+     */
     @Mapping
     private String id;
+
+    /**
+     * 指定了index 用Student类型的最后一个实例的sex属性进行设值
+     */
+    @Mapping(index = 0)
+    private String sex;
 
     @Mapping(source = "sName")
     private String uName;
@@ -27,7 +37,7 @@ public class User {
     @Mapping(generator = GeneratorType.NOW_LOCAL_DATE)
     private LocalDate date;
 
-    @Mapping(source = "address.value")
+    @Mapping(source = "address.value", index = -1)
     @CustomerGenerator(needSourceField = true, customerGenerator = AddressCustomerGenerator.class)
     private String address;
 
@@ -37,6 +47,14 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
     }
 
     public String getUName() {

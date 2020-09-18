@@ -108,7 +108,12 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
         setMethodStr.append(targetClassName)
                 .append(" realTarget = (")
                 .append(targetClassName)
-                .append(")target;\n");
+                .append(")target;")
+                .append(StringTools.LINE_BREAK)
+                .append(StringTools.LINE_BREAK)
+                .append("int sourceSize = sources.size();")
+                .append(StringTools.LINE_BREAK)
+                .append(StringTools.LINE_BREAK);
 
         String mappingParameterClassName = MappingParameter.class.getName();
         int size = mappingParameters.size();
@@ -128,19 +133,19 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
             if (Generator.isNotDefault(generator)) {
                 if (mappingParameter.isNeedSourceField()) {
                     String sourceValueStr = getSourceFieldValueStr(i, sources, mappingParameters);
-                    setMethodStr.append(sourceValueStr).append(StringTools.LINE_BREAK);
+                    setMethodStr.append(sourceValueStr);
                 } else {
                     setMethodStr.append("Object sourceValue").append(i).append(" = null;")
                             .append(StringTools.LINE_BREAK);
                 }
-                setMethodStr.append(StringTools.LINE_BREAK)
-                        .append("Generator generator").append(i).append(" = mappingParameter").append(i).append(".getGenerator();")
+                setMethodStr.append("Generator generator").append(i).append(" = mappingParameter").append(i).append(".getGenerator();")
                         .append(StringTools.LINE_BREAK)
                         .append("Object customerGenerateValue").append(i).append(" = generator").append(i).append(".doGenerate(sourceValue").append(i).append(");")
                         .append(StringTools.LINE_BREAK)
                         .append("realTarget.set")
                         .append(StringTools.toUpperCaseFirstOne(targetFieldName))
                         .append("((").append(type.getName()).append(")customerGenerateValue").append(i).append(");")
+                        .append(StringTools.LINE_BREAK)
                         .append(StringTools.LINE_BREAK);
                 continue;
             }
@@ -154,6 +159,7 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
                         .append("realTarget.set")
                         .append(StringTools.toUpperCaseFirstOne(targetFieldName))
                         .append("((").append(type.getName()).append(")generateValue").append(i).append(");")
+                        .append(StringTools.LINE_BREAK)
                         .append(StringTools.LINE_BREAK);
                 continue;
             }
@@ -163,10 +169,13 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
                     .append("realTarget.set")
                     .append(StringTools.toUpperCaseFirstOne(targetFieldName))
                     .append("((").append(type.getName()).append(")sourceValue").append(i).append(");")
+                    .append(StringTools.LINE_BREAK)
                     .append(StringTools.LINE_BREAK);
         }
 
         setMethodStr.append("}");
+
+        System.out.println(setMethodStr);
 
         CtMethod cm = CtNewMethod.make(setMethodStr.toString(), setterClazz);
         setterClazz.addMethod(cm);
@@ -181,6 +190,7 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
                 .append(StringTools.LINE_BREAK);
         MappingParameter currentMappingParameter = mappingParameters.get(mappingParametersIndex);
         String mappingParameter = "mappingParameter" + mappingParametersIndex;
+        String sourceClassName = "sourceClassName" + mappingParametersIndex;
         String convertType = "convertType" + mappingParametersIndex;
         getSourceFieldValueStr.append("ConvertType ")
                 .append(convertType)
@@ -216,47 +226,39 @@ public final class NormalByteCodeMapping extends BaseByteCodeMapping {
             return getSourceFieldValueStr.toString();
         }
 
-
-        getSourceFieldValueStr.append("String sourceClassName = ")
+        getSourceFieldValueStr.append("String ").append(sourceClassName).append(" = ")
                 .append(mappingParameter)
                 .append(".getSourceClassName();")
-                .append(StringTools.LINE_BREAK)
-                .append("int sourceSize = sources.size();")
                 .append(StringTools.LINE_BREAK)
                 .append("for (int i = 0; i < sourceSize; i++) {")
                 .append(StringTools.LINE_BREAK)
                 .append("Object source = sources.get(i);")
                 .append(StringTools.LINE_BREAK)
-                .append("if (!source.getClass().getName().equals(sourceClassName)) {")
+                .append("if (!source.getClass().getName().equals(").append(sourceClassName).append(")) {")
                 .append(StringTools.LINE_BREAK)
                 .append("continue;")
                 .append(StringTools.LINE_BREAK)
                 .append("}")
                 .append(StringTools.LINE_BREAK);
 
-        String sourceClassName = currentMappingParameter.getSourceClassName();
+        String currentSourceClassName = currentMappingParameter.getSourceClassName();
         for (int i = 0; i < sourceSize; i++) {
             Object source = sources.get(i);
-            if (!source.getClass().getName().equals(sourceClassName)) {
+            if (!source.getClass().getName().equals(currentSourceClassName)) {
                 continue;
             }
             String sourceValueStr = doGetSourceFieldValue(sourceValue, sourcesFieldList, source, i);
             getSourceFieldValueStr.append(sourceValueStr).append(StringTools.LINE_BREAK);
-            getSourceFieldValueStr.append("if (ConvertType.NONE != ").append(convertType).append(") {")
-                    .append(StringTools.LINE_BREAK)
-                    .append(sourceValue).append(" = Converts.convert(").append(convertType).append(", ").append(sourceValue).append(");")
-                    .append(StringTools.LINE_BREAK)
-                    .append("}")
-                    .append(StringTools.LINE_BREAK)
-                    .append(" if (").append(sourceValue).append(" != null) {")
-                    .append(StringTools.LINE_BREAK)
-                    .append(" break;")
-                    .append(StringTools.LINE_BREAK)
-                    .append("}")
-                    .append(StringTools.LINE_BREAK)
-                    .append("}")
-                    .append(StringTools.LINE_BREAK);
+
         }
+        getSourceFieldValueStr.append("if (ConvertType.NONE != ").append(convertType).append(") {")
+                .append(StringTools.LINE_BREAK)
+                .append(sourceValue).append(" = Converts.convert(").append(convertType).append(", ").append(sourceValue).append(");")
+                .append(StringTools.LINE_BREAK)
+                .append("}")
+                .append(StringTools.LINE_BREAK)
+                .append("}")
+                .append(StringTools.LINE_BREAK);
         return getSourceFieldValueStr.toString();
     }
 

@@ -8,6 +8,7 @@ package com.mohan.project.easymapping.test;
 public class Person {
 
     private String id;
+    private String sex;
     private String name;
 
     public String getId() {
@@ -16,6 +17,14 @@ public class Person {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
     }
 
     public String getName() {

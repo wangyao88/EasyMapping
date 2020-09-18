@@ -60,6 +60,7 @@ public class ConfigureSigned extends BaseConfiguration implements Configuration 
                     ConfigureSourceStatus configureSourceStatus = configureSource(mapping, parserParameter, targetFieldName, mappingParameter);
                     if(configureSourceStatus != ConfigureSourceStatus.CONFIGURED) {
                         //TODO 客户自定义属性值生成器，源字段解析失败，如何做
+                        return Optional.empty();
                     }
                 }
                 return Optional.of(mappingParameter);
