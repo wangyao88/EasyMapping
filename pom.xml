@@ -4,8 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>com.mohan.project</groupId>
-	<artifactId>easymapping</artifactId>
-	<version>2.0</version>
+	<artifactId>easy-mapping</artifactId>
+	<version>2.0.Final</version>
 
 	<name>EasyMapping</name>
 	<description>java实体映射工具</description>
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.mohan.project</groupId>
 			<artifactId>easy-tools</artifactId>
-			<version>1.0</version>
+			<version>1.0.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>

@@ -2,18 +2,11 @@ package com.mohan.project.easymapping.test;
 
 import com.mohan.project.easymapping.EasyMappingManager;
 import com.mohan.project.easymapping.EasyMappingStarter;
-import com.mohan.project.easymapping.MappingParameter;
-import com.mohan.project.easymapping.convert.ConvertType;
-import com.mohan.project.easymapping.convert.Converts;
-import com.mohan.project.easymapping.generator.Generator;
-import com.mohan.project.easymapping.generator.GeneratorType;
-import com.mohan.project.easymapping.generator.Generators;
 import com.mohan.project.easytools.common.StringTools;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
