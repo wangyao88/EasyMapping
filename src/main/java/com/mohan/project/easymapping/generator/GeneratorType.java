@@ -2,7 +2,8 @@ package com.mohan.project.easymapping.generator;
 
 /**
  * 实体属性默认值生成策略枚举类
- * @author WangYao
+ *
+ * @author mohan
  * @since 2019-08-23 13:36:23
  */
 public enum GeneratorType {

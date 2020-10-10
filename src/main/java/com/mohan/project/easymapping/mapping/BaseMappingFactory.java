@@ -4,7 +4,7 @@ import com.mohan.project.easymapping.mapping.bytecode.javassist.BaseByteCodeMapp
 import com.mohan.project.easymapping.mapping.reflect.BaseReflectMapping;
 
 /**
- * @author WangYao
+ * @author mohan
  * @since 2020-09-17 10:50
  */
 public class BaseMappingFactory {

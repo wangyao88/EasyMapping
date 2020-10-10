@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * 优先级大于@Mapping的index配置属性
  * 必须同@Mapping一起使用，否则该注解不生效
  *
- * @author WangYao
+ * @author mohan
  * @since 2019-08-23 13:36:23
  */
 @Target(ElementType.FIELD)

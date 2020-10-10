@@ -1,7 +1,7 @@
 package com.mohan.project.easymapping.generator;
 
 /**
- * @author WangYao
+ * @author mohan
  * @since 2020-09-17 09:29
  */
 public class AddressCustomerGenerator implements Generator {

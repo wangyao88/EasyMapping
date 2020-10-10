@@ -11,7 +11,8 @@ import java.util.function.Supplier;
 
 /**
  * 实体属性默认值生成策略
- * @author WangYao
+ *
+ * @author mohan
  * @since 2019-08-23 13:36:23
  */
 public class Generators {

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * 利用字节码进行映射的基础类
  *
- * @author WangYao
+ * @author mohan
  * @since 2020-09-17 10:49
  */
 public class BaseByteCodeMapping extends BaseMapping {

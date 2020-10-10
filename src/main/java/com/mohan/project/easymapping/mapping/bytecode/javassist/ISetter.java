@@ -5,7 +5,7 @@ import com.mohan.project.easymapping.MappingParameter;
 import java.util.List;
 
 /**
- * @author WangYao
+ * @author mohan
  * @since 2020-09-17 15:58
  */
 public interface ISetter {

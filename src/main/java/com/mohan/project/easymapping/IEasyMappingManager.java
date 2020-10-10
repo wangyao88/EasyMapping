@@ -1,14 +1,12 @@
 package com.mohan.project.easymapping;
 
-import com.mohan.project.easymapping.mapping.BaseMappingFactory;
-
 import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
  * 实体属性映射管理类接口
  *
- * @author WangYao
+ * @author mohan
  * @since 2020-09-18 09:22
  */
 public interface IEasyMappingManager {

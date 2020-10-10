@@ -1,8 +1,9 @@
 package com.mohan.project.easymapping.mapping;
 
 import com.mohan.project.easymapping.MappingParameter;
-import com.mohan.project.easymapping.mapping.reflect.NormalReflectMapping;
-import com.mohan.project.easymapping.mapping.reflect.SmartReflectMapping;
+import com.mohan.project.easymapping.mapping.valid.Validator;
+import com.mohan.project.easymapping.mapping.valid.ValidatorFactory;
+import com.mohan.project.easymapping.mapping.valid.ValidatorType;
 import com.mohan.project.easymapping.parser.BaseParser;
 import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * 实体属性映射器
  *
- * @author WangYao
+ * @author mohan
  * @since 2019-08-23 13:36:23
  */
 public abstract class BaseMapping implements Mapping {
@@ -48,7 +49,8 @@ public abstract class BaseMapping implements Mapping {
 
     private <T> Optional<T> doMapping(boolean useSmartMode, Object target, Object[] sources) {
         List<Object> filteredSources = Arrays.stream(sources).filter(ObjectTools::isNotNull).collect(Collectors.toList());
-        if (!valid(useSmartMode, target, filteredSources)) {
+        Validator validator = ValidatorFactory.getValidator(ValidatorType.DEFAULT);
+        if (!validator.valid(useSmartMode, target, filteredSources)) {
             return Optional.empty();
         }
         if(useSmartMode) {
@@ -67,35 +69,6 @@ public abstract class BaseMapping implements Mapping {
     protected abstract <T> Optional<T> doSmartMapping(Object target, List<Object> sources);
 
     protected abstract <T> Optional<T> doNormalMapping(Object target, List<Object> sources, Collection<MappingParameter> mappingParameters);
-
-    private boolean valid(boolean useSmartMode, Object target, List<Object> sources) {
-        List<String> errorMessage = BaseParser.getInstance().getErrorMessage();
-        if (CollectionTools.isNotEmpty(errorMessage)) {
-            LogTools.error(String.join(StringTools.LINE_BREAK, errorMessage));
-            return false;
-        }
-        if (ObjectTools.isNull(target) || CollectionTools.isEmpty(sources)) {
-            LogTools.error("参数值为空！");
-            return false;
-        }
-        if(useSmartMode) {
-            return true;
-        }
-        String targetName = target.getClass().getName();
-        Map<String, Collection<String>> targetSourcesInfoMap = BaseParser.getInstance().getTargetSourcesInfo();
-        Collection<String> sourcesClassName = targetSourcesInfoMap.get(targetName);
-        if (CollectionTools.isEmpty(sourcesClassName)) {
-            LogTools.error("未找到[{0}]相关@MappingStruct的配置信息！", targetName);
-            return false;
-        }
-        for (Object source : sources) {
-            if (!sourcesClassName.contains(source.getClass().getName())) {
-                LogTools.error("[{0}]的@MappingStruct注解中未包含[{1}]的源信息", targetName, source.getClass().getName());
-                return false;
-            }
-        }
-        return true;
-    }
 
     private <T> String getErrorMessage(Class<T> targetClass, Object source) {
         return StringTools.append(StringTools.SPACE, "实体映射失败！", "target class = ", targetClass.getName(), "source = ", String.valueOf(source));

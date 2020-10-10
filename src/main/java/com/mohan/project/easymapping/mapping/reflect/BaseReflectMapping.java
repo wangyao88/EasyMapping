@@ -10,7 +10,7 @@ import java.util.Optional;
 /**
  * 利用反射进行映射的基础类
  *
- * @author WangYao
+ * @author mohan
  * @since 2020-09-17 10:49
  */
 public final class BaseReflectMapping extends BaseMapping {

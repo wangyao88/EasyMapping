@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
  */
 public class MappingTest {
 
-    public static final int BATCH_SIZE = 3000000;
+    public static final int BATCH_SIZE = 300000;
 
     @Before
     public void init() {
@@ -42,8 +42,8 @@ public class MappingTest {
 
                 Optional<User> userOptional = EasyMappingManager.normalMapping(User.class, student);
                 countDownLatch.countDown();
-                if(userOptional.isPresent()) {
-                    if(StringTools.isBlank(userOptional.get().getAddress())) {
+                if (userOptional.isPresent()) {
+                    if (StringTools.isBlank(userOptional.get().getAddress())) {
                         System.out.println("-----");
                     }
                 }
@@ -75,8 +75,8 @@ public class MappingTest {
 
                 Optional<User> userOptional = EasyMappingManager.fastNormalMapping(User.class, student);
                 countDownLatch.countDown();
-                if(userOptional.isPresent()) {
-                    if(StringTools.isBlank(userOptional.get().getAddress())) {
+                if (userOptional.isPresent()) {
+                    if (StringTools.isBlank(userOptional.get().getAddress())) {
                         System.out.println("-----");
                     }
                 }
@@ -126,11 +126,7 @@ public class MappingTest {
         ExecutorService executorService = Executors.newFixedThreadPool(8);
         Address address = new Address();
         address.setValue("北京");
-        for (int i = 0; i < BATCH_SIZE; i++)
-
-
-
-        {
+        for (int i = 0; i < BATCH_SIZE; i++) {
             executorService.submit(() -> {
                 Student student = new Student();
                 student.setId("1");

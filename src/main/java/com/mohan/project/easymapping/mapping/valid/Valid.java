@@ -1,4 +1,4 @@
-package com.mohan.project.easymapping.parser;
+package com.mohan.project.easymapping.mapping.valid;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Config {
+public @interface Valid {
 
 }

@@ -9,7 +9,8 @@ import java.util.Map;
 
 /**
  * 实体属性解析器
- * @author WangYao
+ *
+ * @author mohan
  * @since 2019-08-23 13:36:23
  */
 public interface Parser {
@@ -18,7 +19,7 @@ public interface Parser {
 
     Map<String, Collection<MappingParameter>> getParsedMappingInfo();
 
-    Map<String, Collection<String>> getTargetSourcesInfo();
+    Map<String, Collection<Class<?>>> getTargetSourcesInfo();
 
     List<String> getErrorMessage();
 

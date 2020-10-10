@@ -8,6 +8,9 @@ import com.mohan.project.easymapping.EasyMappingConstant;
 import com.mohan.project.easymapping.MappingParameter;
 import com.mohan.project.easymapping.MappingStruct;
 import com.mohan.project.easymapping.exception.MappingStructSourceNullException;
+import com.mohan.project.easymapping.mapping.valid.Valid;
+import com.mohan.project.easymapping.mapping.valid.Validator;
+import com.mohan.project.easymapping.mapping.valid.ValidatorFactory;
 import com.mohan.project.easytools.common.ArrayTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
@@ -19,16 +22,16 @@ import java.util.stream.Collectors;
 /**
  * 实体属性解析器
  *
- * @author WangYao
+ * @author mohan
  * @since 2019-08-23 13:36:23
  */
 public class BaseParser implements Parser {
 
     private static final Multimap<String, MappingParameter> MAPPING_MAP = ArrayListMultimap.create();
-    private static final Multimap<String, String> TARGET_SOURCES_MAP = ArrayListMultimap.create();
+    private static final Multimap<String, Class<?>> TARGET_SOURCES_MAP = ArrayListMultimap.create();
 
     private static Map<String, Collection<MappingParameter>> UNMODIFIABLE_MAPPING_MAP;
-    private static Map<String, Collection<String>> UNMODIFIABLE_TARGET_SOURCES_MAP;
+    private static Map<String, Collection<Class<?>>> UNMODIFIABLE_TARGET_SOURCES_MAP;
 
     private List<String> errorMessages;
 
@@ -37,7 +40,16 @@ public class BaseParser implements Parser {
     }
 
     private BaseParser() {
+        initErrorMessages();
+        initConfiguration();
+        initValidator();
+    }
+
+    private void initErrorMessages() {
         errorMessages = Lists.newArrayList();
+    }
+
+    private void initConfiguration() {
         String path = this.getClass().getPackage().getName();
         Reflections reflections = new Reflections(path);
         Set<Class<?>> configs = reflections.getTypesAnnotatedWith(Config.class);
@@ -47,6 +59,20 @@ public class BaseParser implements Parser {
                 ConfigurationFactory.register(configuration.getType(), configuration);
             } catch (Exception e) {
                 LogTools.error("注册实体属性配置器失败！", e);
+            }
+        }
+    }
+
+    private void initValidator() {
+        String path = Validator.class.getPackage().getName();
+        Reflections reflections = new Reflections(path);
+        Set<Class<?>> validatorClasses = reflections.getTypesAnnotatedWith(Valid.class);
+        for (Class<?> validatorClass : validatorClasses) {
+            try {
+                Validator validator = (Validator) validatorClass.newInstance();
+                ValidatorFactory.register(validator.getType(), validator);
+            } catch (Exception e) {
+                LogTools.error("注册校验器失败！", e);
             }
         }
     }
@@ -71,7 +97,8 @@ public class BaseParser implements Parser {
                 }
                 List<MappingParameter> mappingParameters = ConfigurationManager.config(mappingStruct, mappingStructType);
                 MAPPING_MAP.putAll(name, mappingParameters);
-                TARGET_SOURCES_MAP.putAll(name, Arrays.stream(mappingStruct.source()).map(Class::getName).collect(Collectors.toList()));
+
+                TARGET_SOURCES_MAP.putAll(name, Arrays.stream(mappingStruct.source()).collect(Collectors.toList()));
             }
             UNMODIFIABLE_MAPPING_MAP = Collections.unmodifiableMap(MAPPING_MAP.asMap());
             UNMODIFIABLE_TARGET_SOURCES_MAP = Collections.unmodifiableMap(TARGET_SOURCES_MAP.asMap());
@@ -88,7 +115,7 @@ public class BaseParser implements Parser {
     }
 
     @Override
-    public Map<String, Collection<String>> getTargetSourcesInfo() {
+    public Map<String, Collection<Class<?>>> getTargetSourcesInfo() {
         return UNMODIFIABLE_TARGET_SOURCES_MAP;
     }
 
