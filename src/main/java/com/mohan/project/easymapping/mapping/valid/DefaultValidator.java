@@ -5,6 +5,7 @@ import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
+import com.mohan.project.strategyfactory.core.ThreeArgStrategy;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,11 +17,10 @@ import java.util.Map;
  * @author mohan
  * @since 2020-10-10 17:04
  */
-@Valid
-public class DefaultValidator extends AbstractValidator {
+public class DefaultValidator implements ThreeArgStrategy<Boolean, Boolean, Object, List> {
 
     @Override
-    public boolean valid(boolean useSmartMode, Object target, List<Object> sources) {
+    public Boolean handle(Boolean useSmartMode, Object target, List sources) {
         List<String> errorMessage = BaseParser.getInstance().getErrorMessage();
         if (CollectionTools.isNotEmpty(errorMessage)) {
             LogTools.error(String.join(StringTools.LINE_BREAK, errorMessage));
@@ -56,10 +56,5 @@ public class DefaultValidator extends AbstractValidator {
             }
         }
         return true;
-    }
-
-    @Override
-    public ValidatorType getType() {
-        return ValidatorType.DEFAULT;
     }
 }

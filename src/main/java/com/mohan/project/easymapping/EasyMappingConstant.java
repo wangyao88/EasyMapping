@@ -6,11 +6,13 @@ package com.mohan.project.easymapping;
  * @author mohan
  * @since 2019-08-23 13:36:23
  */
-public class EasyMappingConstant {
+public interface EasyMappingConstant {
 
-    public static final String PROJECT_NAME = "EasyMapping";
+    String PROJECT_NAME = "EasyMapping";
 
-    public static final String DEFAULT_FIELD_NAME = "Mapping_SAME_FIELD";
+    String DEFAULT_FIELD_NAME = "Mapping_SAME_FIELD";
 
-    public static final int DEFAULT_FIELD_INDEX = -1;
+    int DEFAULT_FIELD_INDEX = -1;
+    
+    String BASE_PACKAGE_PATH = "com.mohan.project.easymapping";
 }

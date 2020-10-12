@@ -1,14 +1,14 @@
 package com.mohan.project.easymapping.mapping;
 
 import com.mohan.project.easymapping.MappingParameter;
-import com.mohan.project.easymapping.mapping.valid.Validator;
-import com.mohan.project.easymapping.mapping.valid.ValidatorFactory;
-import com.mohan.project.easymapping.mapping.valid.ValidatorType;
+import com.mohan.project.easymapping.mapping.valid.DefaultValidator;
 import com.mohan.project.easymapping.parser.BaseParser;
 import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
+import com.mohan.project.strategyfactory.core.StrategyFactory;
+import com.mohan.project.strategyfactory.core.ThreeArgStrategy;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,8 +49,9 @@ public abstract class BaseMapping implements Mapping {
 
     private <T> Optional<T> doMapping(boolean useSmartMode, Object target, Object[] sources) {
         List<Object> filteredSources = Arrays.stream(sources).filter(ObjectTools::isNotNull).collect(Collectors.toList());
-        Validator validator = ValidatorFactory.getValidator(ValidatorType.DEFAULT);
-        if (!validator.valid(useSmartMode, target, filteredSources)) {
+        ThreeArgStrategy<Boolean, Boolean, Object, List> threeArgStrategy = StrategyFactory.getThreeArgStrategy(DefaultValidator.class);
+        Boolean validResult = threeArgStrategy.handle(useSmartMode, target, filteredSources);
+        if (!validResult) {
             return Optional.empty();
         }
         if(useSmartMode) {

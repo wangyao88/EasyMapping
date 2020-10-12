@@ -8,12 +8,10 @@ import com.mohan.project.easymapping.EasyMappingConstant;
 import com.mohan.project.easymapping.MappingParameter;
 import com.mohan.project.easymapping.MappingStruct;
 import com.mohan.project.easymapping.exception.MappingStructSourceNullException;
-import com.mohan.project.easymapping.mapping.valid.Valid;
-import com.mohan.project.easymapping.mapping.valid.Validator;
-import com.mohan.project.easymapping.mapping.valid.ValidatorFactory;
 import com.mohan.project.easytools.common.ArrayTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
+import com.mohan.project.strategyfactory.core.StrategyManager;
 import org.reflections.Reflections;
 
 import java.util.*;
@@ -64,17 +62,7 @@ public class BaseParser implements Parser {
     }
 
     private void initValidator() {
-        String path = Validator.class.getPackage().getName();
-        Reflections reflections = new Reflections(path);
-        Set<Class<?>> validatorClasses = reflections.getTypesAnnotatedWith(Valid.class);
-        for (Class<?> validatorClass : validatorClasses) {
-            try {
-                Validator validator = (Validator) validatorClass.newInstance();
-                ValidatorFactory.register(validator.getType(), validator);
-            } catch (Exception e) {
-                LogTools.error("注册校验器失败！", e);
-            }
-        }
+        StrategyManager.init(EasyMappingConstant.BASE_PACKAGE_PATH);
     }
 
     public static Parser getInstance() {

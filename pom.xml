@@ -21,6 +21,11 @@
 			<version>1.0.Final</version>
 		</dependency>
 		<dependency>
+			<groupId>com.mohan.project</groupId>
+			<artifactId>strategy-factory</artifactId>
+			<version>1.0.Final</version>
+		</dependency>
+		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.11</version>

@@ -1,6 +1,5 @@
 package com.mohan.project.easymapping.mapping.valid;
 
-import com.google.common.base.Objects;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -9,6 +8,7 @@ import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
+import com.mohan.project.strategyfactory.core.ThreeArgStrategy;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
  * @author mohan
  * @since 2020-10-10 17:04
  */
-@Valid
-public class CacheValidator extends AbstractValidator {
+public class CacheValidator implements ThreeArgStrategy<Boolean, Boolean, Object, List> {
 
     private static final Cache<ValidKey, ValidResult> CACHE =
             CacheBuilder.newBuilder()
@@ -32,7 +31,7 @@ public class CacheValidator extends AbstractValidator {
                     .build();
 
     @Override
-    public boolean valid(boolean useSmartMode, Object target, List<Object> sources) {
+    public Boolean handle(Boolean useSmartMode, Object target, List sources) {
         ValidKey validKey = ValidKey.build(useSmartMode, target, sources);
         try {
             ValidResult validResult = CACHE.get(validKey, () -> doValid(useSmartMode, target, sources));
@@ -79,11 +78,6 @@ public class CacheValidator extends AbstractValidator {
             }
         }
         return new ValidResult(true);
-    }
-
-    @Override
-    public ValidatorType getType() {
-        return ValidatorType.CACHE;
     }
 
     private static class ValidKey {
