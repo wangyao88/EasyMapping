@@ -49,10 +49,13 @@ public abstract class BaseMapping implements Mapping {
 
     private <T> Optional<T> doMapping(boolean useSmartMode, Object target, Object[] sources) {
         List<Object> filteredSources = Arrays.stream(sources).filter(ObjectTools::isNotNull).collect(Collectors.toList());
-        DefaultValidator defaultValidator = StrategyFactory.getThreeArgStrategy(DefaultValidator.class);
-        Boolean validResult = defaultValidator.handle(useSmartMode, target, filteredSources);
-        if (!validResult) {
-            return Optional.empty();
+        Optional<DefaultValidator> defaultValidatorOptional = StrategyFactory.getThreeArgStrategy(DefaultValidator.class);
+        if(defaultValidatorOptional.isPresent()) {
+            DefaultValidator defaultValidator = defaultValidatorOptional.get();
+            Boolean validResult = defaultValidator.handle(useSmartMode, target, filteredSources);
+            if (!validResult) {
+                return Optional.empty();
+            }
         }
         if(useSmartMode) {
             return doSmartMapping(target, filteredSources);
