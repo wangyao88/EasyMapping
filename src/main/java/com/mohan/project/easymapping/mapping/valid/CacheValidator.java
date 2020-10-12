@@ -8,7 +8,7 @@ import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
-import com.mohan.project.strategyfactory.core.ThreeArgStrategy;
+import com.mohan.project.strategyfactory.core.AbstractThreeArgStrategy;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * @author mohan
  * @since 2020-10-10 17:04
  */
-public class CacheValidator implements ThreeArgStrategy<Boolean, Boolean, Object, List> {
+public class CacheValidator extends AbstractThreeArgStrategy<Boolean, Boolean, Object, List> {
 
     private static final Cache<ValidKey, ValidResult> CACHE =
             CacheBuilder.newBuilder()
