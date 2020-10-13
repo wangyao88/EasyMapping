@@ -5,7 +5,6 @@ import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
 import com.mohan.project.easytools.log.LogTools;
-import com.mohan.project.strategyfactory.core.AbstractThreeArgStrategy;
 import com.mohan.project.strategyfactory.core.ThreeArgStrategy;
 
 import java.util.Collection;
@@ -18,7 +17,7 @@ import java.util.Map;
  * @author mohan
  * @since 2020-10-10 17:04
  */
-public class DefaultValidator extends AbstractThreeArgStrategy<Boolean, Boolean, Object, List> {
+public class DefaultValidator implements ThreeArgStrategy<Boolean, Boolean, Object, List> {
 
     @Override
     public Boolean handle(Boolean useSmartMode, Object target, List sources) {
@@ -57,5 +56,10 @@ public class DefaultValidator extends AbstractThreeArgStrategy<Boolean, Boolean,
             }
         }
         return true;
+    }
+
+    @Override
+    public String generate() {
+        return defaultGenerate(this.getClass());
     }
 }

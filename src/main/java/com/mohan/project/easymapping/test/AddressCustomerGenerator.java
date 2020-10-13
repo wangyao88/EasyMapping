@@ -1,4 +1,6 @@
-package com.mohan.project.easymapping.generator;
+package com.mohan.project.easymapping.test;
+
+import com.mohan.project.easymapping.generator.Generator;
 
 /**
  * @author mohan

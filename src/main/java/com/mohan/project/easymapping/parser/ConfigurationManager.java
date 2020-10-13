@@ -10,6 +10,7 @@ import com.mohan.project.easytools.common.ArrayTools;
 import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
 import com.mohan.project.easytools.common.StringTools;
+import com.mohan.project.strategyfactory.core.StrategyFactory;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -49,10 +50,18 @@ public class ConfigurationManager {
             List<MappingParameter> currentMappingParameterList = Lists.newArrayList();
             if (CollectionTools.isEmpty(needMappingFields)) {
                 parserParameter.setNeedMappingFields(Stream.of(declaredFields).collect(Collectors.toList()));
-                currentMappingParameterList.addAll(ConfigurationFactory.getConfiguration(ConfigurationType.ALL).config(parserParameter));
+                Optional<ConfigureAll> configureAllOptional = StrategyFactory.getOneArgStrategyByClass(ConfigureAll.class);
+                configureAllOptional.ifPresent(configureAll -> {
+                    List mappingParameterList = configureAll.handle(parserParameter);
+                    currentMappingParameterList.addAll(mappingParameterList);
+                });
             } else {
                 parserParameter.setNeedMappingFields(needMappingFields);
-                currentMappingParameterList.addAll(ConfigurationFactory.getConfiguration(ConfigurationType.SIGNED).config(parserParameter));
+                Optional<ConfigureSigned> configureSignedOptional = StrategyFactory.getOneArgStrategyByClass(ConfigureSigned.class);
+                configureSignedOptional.ifPresent(configureSigned -> {
+                    List mappingParameterList = configureSigned.handle(parserParameter);
+                    currentMappingParameterList.addAll(mappingParameterList);
+                });
             }
             addCurrentMappingParameterList(mappingParameters, currentMappingParameterList);
         }

@@ -2,8 +2,8 @@ package com.mohan.project.easymapping.parser;
 
 import com.google.common.collect.Lists;
 import com.mohan.project.easymapping.CustomerGenerator;
-import com.mohan.project.easymapping.MappingParameter;
 import com.mohan.project.easymapping.EasyMappingConstant;
+import com.mohan.project.easymapping.MappingParameter;
 import com.mohan.project.easymapping.convert.ConvertType;
 import com.mohan.project.easymapping.exception.AttributeNotExistException;
 import com.mohan.project.easymapping.exception.InitializeCustomerGeneratorException;
@@ -11,6 +11,7 @@ import com.mohan.project.easymapping.generator.Generator;
 import com.mohan.project.easymapping.generator.GeneratorType;
 import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
+import com.mohan.project.strategyfactory.core.OneArgStrategy;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -22,17 +23,21 @@ import java.util.Optional;
  * @author mohan
  * @since 2019-08-23 13:36:23
  */
-@Config
-public class ConfigureAll extends BaseConfiguration implements Configuration {
+public class ConfigureAll extends BaseConfiguration implements OneArgStrategy<List, ParserParameter> {
 
     @Override
-    public List<MappingParameter> config(ParserParameter parserParameter) {
+    public List handle(ParserParameter parserParameter) {
         List<MappingParameter> mappingParameters = Lists.newArrayList();
         for (Field needMappingField : parserParameter.getNeedMappingFields()) {
             Optional<MappingParameter> mappingFieldOptional = configureMappingParameter(needMappingField, parserParameter);
             storeConfig(mappingParameters, mappingFieldOptional);
         }
         return mappingParameters;
+    }
+
+    @Override
+    public String generate() {
+        return defaultGenerate(this.getClass());
     }
 
     private Optional<MappingParameter> configureMappingParameter(Field needMappingField, ParserParameter parserParameter) {
@@ -80,10 +85,5 @@ public class ConfigureAll extends BaseConfiguration implements Configuration {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public ConfigurationType getType() {
-        return ConfigurationType.ALL;
     }
 }

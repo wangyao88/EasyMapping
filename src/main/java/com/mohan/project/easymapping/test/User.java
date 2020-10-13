@@ -3,7 +3,6 @@ package com.mohan.project.easymapping.test;
 import com.mohan.project.easymapping.CustomerGenerator;
 import com.mohan.project.easymapping.Mapping;
 import com.mohan.project.easymapping.MappingStruct;
-import com.mohan.project.easymapping.generator.AddressCustomerGenerator;
 import com.mohan.project.easymapping.generator.GeneratorType;
 
 import java.time.LocalDate;

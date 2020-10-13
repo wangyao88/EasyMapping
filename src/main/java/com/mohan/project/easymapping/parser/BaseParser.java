@@ -39,29 +39,14 @@ public class BaseParser implements Parser {
 
     private BaseParser() {
         initErrorMessages();
-        initConfiguration();
-        initValidator();
+        initConfigurationAndValidator();
     }
 
     private void initErrorMessages() {
         errorMessages = Lists.newArrayList();
     }
 
-    private void initConfiguration() {
-        String path = this.getClass().getPackage().getName();
-        Reflections reflections = new Reflections(path);
-        Set<Class<?>> configs = reflections.getTypesAnnotatedWith(Config.class);
-        for (Class<?> config : configs) {
-            try {
-                Configuration configuration = (Configuration) config.newInstance();
-                ConfigurationFactory.register(configuration.getType(), configuration);
-            } catch (Exception e) {
-                LogTools.error("注册实体属性配置器失败！", e);
-            }
-        }
-    }
-
-    private void initValidator() {
+    private void initConfigurationAndValidator() {
         StrategyManager.init(EasyMappingConstant.BASE_PACKAGE_PATH);
     }
 

@@ -12,6 +12,7 @@ import com.mohan.project.easymapping.generator.Generator;
 import com.mohan.project.easymapping.generator.GeneratorType;
 import com.mohan.project.easytools.common.CollectionTools;
 import com.mohan.project.easytools.common.ObjectTools;
+import com.mohan.project.strategyfactory.core.OneArgStrategy;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -23,17 +24,21 @@ import java.util.Optional;
  * @author mohan
  * @since 2019-08-23 13:36:23
  */
-@Config
-public class ConfigureSigned extends BaseConfiguration implements Configuration {
+public class ConfigureSigned extends BaseConfiguration implements OneArgStrategy<List, ParserParameter> {
 
     @Override
-    public List<MappingParameter> config(ParserParameter parserParameter) {
+    public List handle(ParserParameter parserParameter) {
         List<MappingParameter> mappingParameters = Lists.newArrayList();
         for (Field declaredField : parserParameter.getNeedMappingFields()) {
             Optional<MappingParameter> mappingFieldOptional = configureMappingParameter(declaredField, parserParameter);
             storeConfig(mappingParameters, mappingFieldOptional);
         }
         return mappingParameters;
+    }
+
+    @Override
+    public String generate() {
+        return defaultGenerate(this.getClass());
     }
 
     private Optional<MappingParameter> configureMappingParameter(Field targetField, ParserParameter parserParameter) {
@@ -107,11 +112,6 @@ public class ConfigureSigned extends BaseConfiguration implements Configuration 
             return ConfigureSourceStatus.CONFIGURED;
         }
         return ConfigureSourceStatus.MISS_ATTRIBUTE;
-    }
-
-    @Override
-    public ConfigurationType getType() {
-        return ConfigurationType.SIGNED;
     }
 
     private static enum ConfigureSourceStatus {

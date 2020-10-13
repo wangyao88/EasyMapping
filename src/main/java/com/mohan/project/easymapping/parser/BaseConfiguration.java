@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author mohan
  * @since 2019-08-23 13:36:23
  */
-public abstract class BaseConfiguration implements Configuration {
+public abstract class BaseConfiguration {
 
     protected Optional<List<Field>> getSourceField(String sourceFieldName, List<Field> sourceFields) {
         if(sourceFieldName.contains(StringTools.POINT)) {
